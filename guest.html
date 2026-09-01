@@ -5,241 +5,241 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>הזמנה לחתונה · אריאל & מירב</title>
 
-  <!-- ═══ תצוגה מקדימה בוואטסאפ (כרטיס עם תמונת ההזמנה) ═══ -->
+  <!-- ═══ תצוגה מקדימה בוואטסאפ — כרטיס עם תמונה שנראה ככפתור ═══ -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="הזמנה לחתונה · אריאל & מירב">
-  <meta property="og:description" content="22.12.2026 · אולמי אלגריה — לאישור הגעה ולניווט, לחצו כאן">
-  <meta property="og:image" content="https://arial13579.github.io/wedding-rsvp/invitation.jpg">
+  <meta property="og:title" content="להזמנה ולאישור הגעה">
+  <meta property="og:description" content="אריאל & מירב · יום שלישי, 22.12.2026 · אולמי אלגריה, קרית עקרון">
+  <meta property="og:image" content="https://arial13579.github.io/wedding-rsvp/og-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="הזמנה לחתונה של אריאל ומירב">
   <meta property="og:url" content="https://arial13579.github.io/wedding-rsvp/guest.html">
-  <meta name="theme-color" content="#0a0812">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#0A0A0C">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700&family=Heebo:wght@200;300;400;500;700&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --green:#38E07B; --green-d:#12A150;
-      --red:#FF6A5C;   --red-d:#E23B2E;
-      --gold:#FFCF6B;
-      --ink:#ffffff;
-      --ink-2:rgba(236,236,248,.62);
-      --ink-3:rgba(236,236,248,.36);
-      --glass:rgba(255,255,255,.06);
-      --glass-2:rgba(255,255,255,.11);
-      --brd:rgba(255,255,255,.14);
-      --r:24px;
+      --bg:#0A0B0C;
+      --panel:rgba(120,236,226,.055);
+      --panel-2:rgba(120,236,226,.095);
+      --edge:rgba(140,240,230,.14);
+      --edge-bright:rgba(140,240,230,.26);
+      --text:#F0F4F3;
+      --text-2:rgba(224,240,238,.56);
+      --text-3:rgba(224,240,238,.32);
+      --gold:#3BE0CB;
+      --gold-line:rgba(59,224,203,.42);
+      --green:#2FCB86; --green-d:#149A62;
+      --rose:#F2726A;  --rose-d:#D2453B;
+      --amber:#E7B24B;
+      --r:20px;
+      --serif:'Frank Ruhl Libre',Georgia,'Times New Roman',serif;
+      --sans:'Heebo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     }
     *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
     html,body{min-height:100%;}
     body{
-      font-family:'Assistant',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      color:var(--ink); background:#0a0812; overflow-x:hidden;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      font-family:var(--sans); color:var(--text); background:var(--bg);
+      overflow-x:hidden; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
-    /* ─── רקע אַאורורה נע ─── */
-    .aurora{position:fixed; inset:-30%; z-index:-2; filter:blur(8px);
+    /* ─── רקע שחור מט ─── */
+    .bg{position:fixed; inset:0; z-index:-2;
       background:
-        radial-gradient(38% 34% at 18% 14%, rgba(120,255,190,.22), transparent 60%),
-        radial-gradient(40% 36% at 84% 12%, rgba(190,130,255,.24), transparent 60%),
-        radial-gradient(46% 40% at 78% 88%, rgba(255,140,120,.20), transparent 60%),
-        radial-gradient(50% 44% at 20% 92%, rgba(90,150,255,.20), transparent 62%),
-        #0a0812;
-      animation:drift 26s ease-in-out infinite alternate;
+        radial-gradient(115% 65% at 50% -12%, rgba(59,224,203,.09), transparent 60%),
+        radial-gradient(80% 55% at 85% 108%, rgba(59,224,203,.06), transparent 60%),
+        radial-gradient(90% 60% at 10% 100%, rgba(90,120,255,.05), transparent 60%),
+        var(--bg);
     }
-    @keyframes drift{
-      0%{transform:scale(1) rotate(0deg);}
-      50%{transform:scale(1.15) rotate(6deg);}
-      100%{transform:scale(1.05) rotate(-4deg);}
-    }
-    .grain{position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.4; mix-blend-mode:overlay;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    .grain{position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.32; mix-blend-mode:soft-light;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
 
     .stage{
-      max-width:440px; margin:0 auto; position:relative;
-      padding:calc(env(safe-area-inset-top) + 34px) 20px calc(env(safe-area-inset-bottom) + 46px);
-      display:flex; flex-direction:column; gap:15px;
+      max-width:430px; margin:0 auto; position:relative;
+      padding:calc(env(safe-area-inset-top) + 40px) 20px calc(env(safe-area-inset-bottom) + 48px);
+      display:flex; flex-direction:column; gap:16px;
     }
 
     .glass{
-      background:var(--glass); border:1px solid var(--brd); border-radius:var(--r);
-      -webkit-backdrop-filter:blur(26px) saturate(1.7); backdrop-filter:blur(26px) saturate(1.7);
-      box-shadow:0 24px 60px -26px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.13);
+      background:var(--panel); border:1px solid var(--edge); border-radius:var(--r);
+      -webkit-backdrop-filter:blur(34px) saturate(1.1); backdrop-filter:blur(34px) saturate(1.1);
+      box-shadow:0 30px 70px -34px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05);
     }
 
-    /* ─── מצב תצוגה ─── */
     .demo-pill{
       position:fixed; top:12px; inset-inline-start:12px; z-index:10;
-      background:rgba(255,207,107,.16); color:var(--gold); border:1px solid rgba(255,207,107,.35);
-      font-size:11px; font-weight:700; padding:5px 11px; border-radius:999px;
+      background:rgba(231,178,75,.12); color:var(--amber); border:1px solid rgba(231,178,75,.3);
+      font-size:10.5px; font-weight:500; letter-spacing:.4px; padding:5px 11px; border-radius:999px;
       -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
     }
 
     /* ─── HERO ─── */
     .hero{display:flex; flex-direction:column; align-items:center;}
-    .overline{
-      text-transform:uppercase; letter-spacing:4px; font-size:10.5px; font-weight:600;
-      color:var(--ink-2); margin-bottom:16px;
+    .kicker{
+      font-family:var(--sans); text-transform:uppercase; letter-spacing:5px; font-size:10px; font-weight:400;
+      color:var(--gold); margin-bottom:18px;
     }
     .frame{
-      width:100%; border-radius:26px; overflow:hidden; position:relative;
-      border:1px solid rgba(255,255,255,.18);
-      box-shadow:0 46px 90px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.04);
-      transition:transform .25s cubic-bezier(.2,.9,.3,1);
-      animation:breathe 7s ease-in-out infinite;
+      width:100%; padding:9px; border-radius:18px; position:relative;
+      background:var(--panel); border:1px solid var(--edge);
+      box-shadow:0 40px 90px -36px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.05);
+      transition:transform .3s cubic-bezier(.2,.9,.3,1);
       transform-style:preserve-3d;
     }
-    @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.015);}}
-    .frame img{width:100%; display:block; height:auto;}
+    .frame::after{content:""; position:absolute; inset:9px; border-radius:11px; pointer-events:none;
+      box-shadow:inset 0 0 0 1px var(--gold-line);}
+    .frame img{width:100%; display:block; height:auto; border-radius:11px;}
     .frame .fallback{
-      width:100%; aspect-ratio:4/5; display:grid; place-items:center;
-      background:linear-gradient(160deg,#2a2137,#432a44 60%,#2b3350);
-      color:rgba(255,255,255,.5); font-size:14px; font-weight:600; letter-spacing:1px;
+      width:100%; aspect-ratio:4/5; display:grid; place-items:center; border-radius:11px;
+      background:linear-gradient(160deg,#17171b,#232329); font-family:var(--serif);
+      color:var(--text-2); font-size:22px; font-weight:300; letter-spacing:1px;
     }
-    .frame::after{ /* בוהק נע */
-      content:""; position:absolute; inset:0; pointer-events:none;
-      background:linear-gradient(120deg,transparent 40%,rgba(255,255,255,.16) 50%,transparent 60%);
-      background-size:250% 250%; animation:sheen 6.5s ease-in-out infinite;
-    }
-    @keyframes sheen{0%{background-position:120% 0;}55%,100%{background-position:-40% 0;}}
 
     .names{
-      font-family:'Heebo',sans-serif; font-weight:300; font-size:36px; letter-spacing:.5px;
-      margin:22px 0 9px; text-align:center; line-height:1.1;
-      background:linear-gradient(115deg,#fff 10%,#c9b4ff 40%,#fff 70%);
-      background-size:220% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
-      animation:shimmer 9s linear infinite;
+      font-family:var(--serif); font-weight:300; font-size:38px; letter-spacing:.5px;
+      margin:24px 0 12px; text-align:center; line-height:1.12; color:var(--text);
     }
-    @keyframes shimmer{to{background-position:220% center;}}
-    .date{color:var(--ink-2); font-weight:600; letter-spacing:5px; font-size:12.5px;}
+    .date{
+      font-family:var(--sans); font-weight:300; font-size:12px; letter-spacing:6px;
+      color:var(--text-2);
+    }
 
-    .count{
-      margin-top:14px; display:inline-flex; align-items:center; gap:8px;
-      padding:9px 16px; border-radius:999px; font-size:12.5px; font-weight:700; color:var(--ink);
-      background:var(--glass-2); border:1px solid var(--brd);
+    /* ─── ספירה לאחור ─── */
+    .countdown{padding:18px 14px 15px; display:flex; flex-direction:column; align-items:center;}
+    .countdown .cd-title{
+      font-family:var(--sans); text-transform:uppercase; letter-spacing:4px; font-size:9.5px;
+      font-weight:400; color:var(--gold); margin-bottom:14px;
     }
-    .count b{color:var(--green); font-variant-numeric:tabular-nums;}
+    .cd-grid{display:flex; align-items:stretch; width:100%;}
+    .cd-cell{flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:0 4px;}
+    .cd-cell + .cd-cell{border-inline-start:1px solid var(--edge);}
+    .cd-num{
+      font-family:var(--serif); font-weight:300; font-size:32px; line-height:1;
+      color:var(--text); font-variant-numeric:tabular-nums;
+    }
+    .cd-lab{
+      font-family:var(--sans); text-transform:uppercase; letter-spacing:2px; font-size:8.5px;
+      font-weight:400; color:var(--text-3);
+    }
 
-    /* ─── כרטיס ברכה ─── */
-    .greet{padding:19px 22px; font-size:16.5px; line-height:1.6; text-align:center; color:rgba(255,255,255,.92);}
-    .greet b{font-weight:700;}
+    /* ─── ברכה ─── */
+    .greet{
+      padding:20px 22px; font-family:var(--serif); font-weight:300; font-size:18px; line-height:1.6;
+      text-align:center; color:var(--text);
+    }
+    .greet b{font-weight:500;}
 
-    /* ─── מיקום / Waze ─── */
-    .loc{
-      display:flex; align-items:center; gap:13px; text-decoration:none; color:inherit;
-      padding:15px 17px; transition:transform .18s cubic-bezier(.2,.9,.3,1);
-    }
-    .loc:active{transform:scale(.975);}
-    .loc-pin{
-      width:42px; height:42px; border-radius:13px; flex:none; display:grid; place-items:center;
-      background:linear-gradient(160deg,rgba(56,224,123,.22),rgba(56,224,123,.08));
-      border:1px solid rgba(56,224,123,.25);
-    }
-    .loc-pin svg{width:21px; height:21px; fill:var(--green);}
+    /* ─── מיקום ─── */
+    .loc{display:flex; align-items:center; gap:13px; text-decoration:none; color:inherit;
+      padding:15px 17px; transition:transform .18s cubic-bezier(.2,.9,.3,1);}
+    .loc:active{transform:scale(.98);}
+    .loc-pin{width:40px; height:40px; border-radius:11px; flex:none; display:grid; place-items:center;
+      background:rgba(59,224,203,.14); border:1px solid rgba(59,224,203,.3);}
+    .loc-pin svg{width:19px; height:19px; fill:var(--gold);}
     .loc-txt{flex:1; min-width:0;}
-    .loc-name{font-weight:700; font-size:15.5px;}
-    .loc-addr{color:var(--ink-2); font-size:12.5px; margin-top:2px;}
-    .loc-cta{color:var(--green); font-weight:700; font-size:13px; white-space:nowrap;}
+    .loc-name{font-family:var(--serif); font-weight:500; font-size:16px;}
+    .loc-addr{color:var(--text-2); font-size:12px; margin-top:2px; letter-spacing:.2px;}
+    .loc-cta{color:var(--gold); font-weight:500; font-size:12px; letter-spacing:1px; white-space:nowrap;}
 
-    /* ─── באנר "כבר אישרת" ─── */
-    .answered{
-      text-align:center; font-size:13px; font-weight:600; color:var(--ink-2);
-      padding:11px 14px; border-radius:16px; background:rgba(255,255,255,.05); border:1px solid var(--brd);
-    }
-    .answered span{color:var(--ink); font-weight:700;}
+    /* ─── באנר "כבר סימנת" ─── */
+    .answered{text-align:center; font-size:12.5px; font-weight:400; color:var(--text-2);
+      padding:11px 14px; border-radius:14px; background:rgba(255,255,255,.035); border:1px solid var(--edge);}
+    .answered span{color:var(--gold); font-weight:500;}
 
     /* ─── כפתורי בחירה מרחפים ─── */
-    .choices{display:flex; flex-direction:column; gap:14px; margin-top:2px;}
+    .choices{display:flex; flex-direction:column; gap:14px; margin-top:4px;}
     .choice{
-      position:relative; z-index:1;
-      width:100%; border:0; border-radius:22px; padding:19px 20px;
-      font-family:inherit; font-weight:800; font-size:18px; color:#fff; cursor:pointer;
-      display:flex; align-items:center; justify-content:center; gap:9px;
+      position:relative; z-index:1; width:100%; border:1px solid var(--edge-bright); border-radius:16px;
+      padding:19px 20px; font-family:var(--sans); font-weight:500; font-size:17px; letter-spacing:.5px;
+      color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
       animation:float var(--d,3.4s) ease-in-out infinite;
-      transition:transform .2s cubic-bezier(.2,.9,.3,1), filter .2s;
-      text-shadow:0 1px 6px rgba(0,0,0,.28);
+      transition:transform .22s cubic-bezier(.2,.9,.3,1), filter .22s;
     }
-    .choice::before{
-      content:""; position:absolute; inset:0; border-radius:inherit; z-index:-1;
-      background:inherit; filter:blur(20px); opacity:.55;
-      transform:translateY(8px) scale(.9);
-    }
-    .choice:hover{animation-play-state:paused; transform:translateY(-4px) scale(1.02); filter:brightness(1.06);}
-    .choice:active{transform:scale(.97);}
+    .choice::before{content:""; position:absolute; inset:0; border-radius:inherit; z-index:-1;
+      background:inherit; filter:blur(22px); opacity:.5; transform:translateY(9px) scale(.88);}
+    .choice:hover{animation-play-state:paused; transform:translateY(-4px); filter:brightness(1.08);}
+    .choice:active{transform:scale(.975);}
     @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
 
-    .choice.yes  {background:linear-gradient(135deg,var(--green),var(--green-d)); --d:3.2s; animation-delay:0s;}
-    .choice.maybe{background:linear-gradient(105deg,var(--green) 0 42%, var(--gold) 50%, var(--red) 58% 100%); --d:3.7s; animation-delay:.35s;}
-    .choice.no   {background:linear-gradient(135deg,var(--red),var(--red-d)); --d:3.45s; animation-delay:.7s;}
+    .choice.yes  {background:linear-gradient(135deg,rgba(55,208,138,.92),rgba(28,158,104,.85)); --d:3.2s; animation-delay:0s;}
+    .choice.maybe{background:linear-gradient(105deg,rgba(55,208,138,.88) 0 40%,rgba(231,178,75,.9) 50%,rgba(242,114,106,.88) 60% 100%); --d:3.7s; animation-delay:.35s;}
+    .choice.no   {background:linear-gradient(135deg,rgba(242,114,106,.9),rgba(210,69,59,.85)); --d:3.45s; animation-delay:.7s;}
 
     /* ─── בורר כמויות ─── */
     .steppers{padding:4px 20px;}
-    .srow{display:flex; align-items:center; justify-content:space-between; padding:17px 0; font-weight:700; font-size:16px;}
-    .srow + .srow{border-top:1px solid rgba(255,255,255,.1);}
+    .srow{display:flex; align-items:center; justify-content:space-between; padding:17px 0;
+      font-family:var(--serif); font-weight:400; font-size:17px;}
+    .srow + .srow{border-top:1px solid var(--edge);}
     .stp{display:flex; align-items:center; gap:16px;}
-    .stp button{
-      width:36px; height:36px; border-radius:50%; border:0; cursor:pointer;
-      background:rgba(255,255,255,.14); color:#fff; font-size:21px; line-height:1; font-weight:400;
-      display:grid; place-items:center; transition:transform .12s, background .2s;
-    }
-    .stp button:active{transform:scale(.86); background:rgba(255,255,255,.26);}
-    .stp b{min-width:22px; text-align:center; font-size:19px; font-variant-numeric:tabular-nums;}
+    .stp button{width:36px; height:36px; border-radius:50%; border:1px solid var(--edge); cursor:pointer;
+      background:rgba(255,255,255,.05); color:#fff; font-size:20px; line-height:1; font-weight:300;
+      display:grid; place-items:center; transition:transform .12s, background .2s;}
+    .stp button:active{transform:scale(.86); background:rgba(255,255,255,.14);}
+    .stp b{min-width:22px; text-align:center; font-family:var(--sans); font-size:18px; font-weight:400; font-variant-numeric:tabular-nums;}
 
-    .btn{
-      width:100%; border:0; border-radius:var(--r); padding:17px 20px;
-      font-family:inherit; font-weight:800; font-size:17px; color:#fff; cursor:pointer;
-      transition:transform .18s cubic-bezier(.2,.9,.3,1);
-    }
-    .btn:active{transform:scale(.965);}
-    .btn-primary{background:linear-gradient(135deg,var(--green),var(--green-d));
-      box-shadow:0 16px 38px -12px rgba(56,224,123,.6), inset 0 1px 0 rgba(255,255,255,.35);}
-    .btn-ghost{background:transparent; color:var(--ink-2); font-weight:600; font-size:15px; padding:12px;}
+    .btn{width:100%; border:1px solid var(--edge-bright); border-radius:var(--r); padding:17px 20px;
+      font-family:var(--sans); font-weight:500; font-size:16px; letter-spacing:.5px; color:#fff; cursor:pointer;
+      transition:transform .18s cubic-bezier(.2,.9,.3,1), filter .2s;}
+    .btn:active{transform:scale(.97);}
+    .btn-primary{background:linear-gradient(135deg,rgba(55,208,138,.92),rgba(28,158,104,.85));
+      -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);}
+    .btn-primary:hover{filter:brightness(1.08);}
+    .btn-ghost{background:transparent; border-color:transparent; color:var(--text-2); font-weight:400; font-size:14px; padding:12px;}
 
     /* ─── מצבי סיום ─── */
-    .loading{text-align:center; color:var(--ink-2); padding:22px; font-weight:600;}
-    .done{text-align:center; padding:34px 26px;}
-    .done .badge{width:72px; height:72px; margin:0 auto 18px; border-radius:50%; display:grid; place-items:center;}
-    .done .badge.ok{background:linear-gradient(135deg,var(--green),var(--green-d)); box-shadow:0 18px 40px -12px rgba(56,224,123,.6);}
-    .done .badge.soft{background:rgba(255,255,255,.12);}
-    .done .badge svg{width:34px; height:34px;}
-    .checkmark{stroke:#fff; stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; fill:none;
-      stroke-dasharray:26; stroke-dashoffset:26; animation:draw .5s .1s forwards cubic-bezier(.6,0,.3,1);}
+    .loading{text-align:center; color:var(--text-2); padding:24px; font-family:var(--serif); font-weight:300; font-size:16px; letter-spacing:1px;}
+    .done{text-align:center; padding:36px 26px;}
+    .done .badge{width:64px; height:64px; margin:0 auto 20px; border-radius:50%; display:grid; place-items:center;
+      border:1px solid var(--edge-bright);}
+    .done .badge.ok{background:linear-gradient(135deg,rgba(55,208,138,.9),rgba(28,158,104,.8));}
+    .done .badge.soft{background:rgba(255,255,255,.06);}
+    .done .badge svg{width:30px; height:30px;}
+    .checkmark{stroke:#fff; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; fill:none;
+      stroke-dasharray:26; stroke-dashoffset:26; animation:draw .55s .1s forwards cubic-bezier(.6,0,.3,1);}
     @keyframes draw{to{stroke-dashoffset:0;}}
-    .done h2{font-weight:800; font-size:21px; margin-bottom:8px;}
-    .done p{color:var(--ink-2); font-size:15px; line-height:1.6;}
+    .done .badge.soft b{font-family:var(--serif); font-size:26px; font-weight:300; color:var(--text-2);}
+    .done h2{font-family:var(--serif); font-weight:400; font-size:22px; margin-bottom:9px;}
+    .done p{color:var(--text-2); font-size:14.5px; line-height:1.6;}
 
-    .foot{text-align:center; color:var(--ink-3); font-size:12px; margin-top:6px;}
-    .invalid{text-align:center; padding:46px 26px;}
-    .invalid .emo{font-size:40px; margin-bottom:14px;}
-    .invalid h2{font-weight:800; font-size:20px; margin-bottom:8px;}
-    .invalid p{color:var(--ink-2); font-size:14px;}
+    .foot{text-align:center; color:var(--text-3); font-size:11px; letter-spacing:.4px; margin-top:8px;}
+
+    .invalid{text-align:center; padding:48px 26px;}
+    .invalid .badge{width:56px; height:56px; margin:0 auto 18px; border-radius:50%; display:grid; place-items:center;
+      background:rgba(255,255,255,.05); border:1px solid var(--edge);}
+    .invalid .badge svg{width:24px; height:24px; stroke:var(--text-2); stroke-width:1.6; fill:none;}
+    .invalid h2{font-family:var(--serif); font-weight:400; font-size:21px; margin-bottom:9px;}
+    .invalid p{color:var(--text-2); font-size:14px; line-height:1.6;}
 
     .hidden{display:none !important;}
 
     @keyframes rise{from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:none;}}
     .stage > *{animation:rise .8s cubic-bezier(.2,.8,.2,1) both;}
-    .stage > *:nth-child(1){animation-delay:.02s}
-    .stage > *:nth-child(2){animation-delay:.09s}
-    .stage > *:nth-child(3){animation-delay:.16s}
-    .stage > *:nth-child(4){animation-delay:.23s}
-    .stage > *:nth-child(5){animation-delay:.3s}
-    .stage > *:nth-child(6){animation-delay:.37s}
+    .stage > *:nth-child(1){animation-delay:.03s}
+    .stage > *:nth-child(2){animation-delay:.1s}
+    .stage > *:nth-child(3){animation-delay:.17s}
+    .stage > *:nth-child(4){animation-delay:.24s}
+    .stage > *:nth-child(5){animation-delay:.31s}
+    .stage > *:nth-child(6){animation-delay:.38s}
 
     @media (prefers-reduced-motion:reduce){
-      .aurora,.frame,.frame::after,.names,.choice,.stage > *{animation:none !important;}
+      .frame,.choice,.stage > *{animation:none !important;}
     }
   </style>
 </head>
 <body>
-  <div class="aurora"></div>
+  <div class="bg"></div>
   <div class="grain"></div>
 
   <div id="demoPill" class="demo-pill hidden">מצב תצוגה — הנתונים לא נשמרים</div>
 
   <main class="stage" id="stage">
-    <div class="loading" id="bootLoading">רגע…</div>
+    <div class="loading">רגע…</div>
   </main>
 
   <script src="config.js"></script>
@@ -250,9 +250,10 @@
     const guestId = params.get('id');
     const fbReady = !!(cfg.firebase && cfg.firebase.apiKey);
     const demo    = !guestId || !fbReady;
+    const reduce  = matchMedia('(prefers-reduced-motion:reduce)').matches;
 
     const FS = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-    let guestRef = null, guest = null;
+    let guestRef = null, guest = null, cdTimer = null;
 
     const LABELS = { yes:'מגיע', no:'לא מגיע', maybe:'אולי מגיע', pending:'ממתין' };
 
@@ -278,43 +279,44 @@
       renderMain();
     }
 
-    /* ═══ מסך קישור לא תקין ═══ */
     function renderInvalid(){
       document.getElementById('stage').innerHTML = `
         <div class="glass invalid">
-          <div class="emo">🔗</div>
+          <div class="badge"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg></div>
           <h2>הקישור אינו תקין</h2>
-          <p>ייתכן שנפלה טעות בהעתקה. אפשר לפנות לבעלי השמחה לקבלת קישור חדש.</p>
+          <p>ייתכן שנפלה טעות בהעתקה.<br>אפשר לפנות לבעלי השמחה לקבלת קישור חדש.</p>
         </div>`;
     }
 
-    /* ═══ מסך ראשי ═══ */
     function renderMain(){
       const c = cfg;
-      const dotDate = (c.dateText||'').split('.').join(' · ');
       const already = guest.status && guest.status !== 'pending';
       let counts = { adults: Math.max(1, guest.adults||1), children: Math.max(0, guest.children||0) };
-
-      const days = daysUntil(c.dateISO);
-      const countHtml = days > 0
-        ? `<div class="count">עוד <b>${days}</b> ${days===1?'יום':'ימים'} לחתונה</div>` : '';
-
       const wazeUrl = 'https://waze.com/ul?q=' + encodeURIComponent(c.wazeQuery||c.venueAddress||'') + '&navigate=yes';
 
       document.getElementById('stage').innerHTML = `
         <div class="hero">
-          <div class="overline">הזמנה לחתונה</div>
+          <div class="kicker">הזמנה לחתונה</div>
           <div class="frame" id="frame">
-            <img src="${c.invitationImage||''}" alt="${c.couple||''}"
-                 onerror="this.outerHTML='<div class=&quot;fallback&quot;>${(c.couple||'ההזמנה')}</div>'">
+            <img src="${c.invitationImage||''}" alt="${esc(c.couple||'')}"
+                 onerror="this.outerHTML='<div class=&quot;fallback&quot;>${esc(c.couple||'ההזמנה')}</div>'">
           </div>
-          <h1 class="names">${c.couple||''}</h1>
-          <div class="date">${dotDate}</div>
-          ${countHtml}
+          <h1 class="names">${esc(c.couple||'')}</h1>
+          <div class="date" dir="ltr">${esc(dmy(c))}</div>
+        </div>
+
+        <div class="glass countdown">
+          <div class="cd-title">הספירה לאחור</div>
+          <div class="cd-grid" id="cdGrid">
+            <div class="cd-cell"><span class="cd-num" id="cd-d">–</span><span class="cd-lab">ימים</span></div>
+            <div class="cd-cell"><span class="cd-num" id="cd-h">–</span><span class="cd-lab">שעות</span></div>
+            <div class="cd-cell"><span class="cd-num" id="cd-m">–</span><span class="cd-lab">דקות</span></div>
+            <div class="cd-cell"><span class="cd-num" id="cd-s">–</span><span class="cd-lab">שניות</span></div>
+          </div>
         </div>
 
         <div class="glass greet">
-          שלום <b>${esc(guest.name||'')}</b>,<br>אנחנו שמחים להזמין אתכם לחגוג איתנו&nbsp;💍
+          שלום <b>${esc(guest.name||'')}</b>,<br>נשמח לחגוג איתכם ביום המיוחד שלנו
         </div>
 
         <a class="glass loc" href="${wazeUrl}" target="_blank" rel="noopener">
@@ -331,7 +333,7 @@
         ${already ? `<div class="answered">כבר סימנתם: <span>${LABELS[guest.status]||''}</span> — אפשר לעדכן</div>` : ''}
 
         <div id="choose" class="choices">
-          <button class="choice yes"   data-s="yes">מגיע 🎉</button>
+          <button class="choice yes"   data-s="yes">מגיע</button>
           <button class="choice maybe" data-s="maybe">אולי מגיע</button>
           <button class="choice no"    data-s="no">לא מגיע</button>
         </div>
@@ -359,8 +361,32 @@
         <div class="foot">אפשר לחזור לקישור הזה ולעדכן את התשובה בכל רגע</div>
       `;
 
+      startCountdown();
       wireEvents(counts);
       wireTilt();
+    }
+
+    /* ─── ספירה לאחור ─── */
+    function startCountdown(){
+      const target = cfg.dateISO ? new Date(cfg.dateISO).getTime() : 0;
+      const pad = n => String(n).padStart(2,'0');
+      function tick(){
+        let diff = Math.max(0, target - Date.now());
+        const d = Math.floor(diff/864e5); diff -= d*864e5;
+        const h = Math.floor(diff/36e5);  diff -= h*36e5;
+        const m = Math.floor(diff/6e4);   diff -= m*6e4;
+        const s = Math.floor(diff/1e3);
+        const set = (id,v)=>{ const el = document.getElementById(id); if (el) el.textContent = v; };
+        set('cd-d', d); set('cd-h', pad(h)); set('cd-m', pad(m)); set('cd-s', pad(s));
+      }
+      tick();
+      clearInterval(cdTimer);
+      if (reduce){
+        const s = document.getElementById('cd-s'); if (s) s.closest('.cd-cell').style.display = 'none';
+        cdTimer = setInterval(tick, 60000);
+      } else {
+        cdTimer = setInterval(tick, 1000);
+      }
     }
 
     function wireEvents(counts){
@@ -391,7 +417,7 @@
         const r = frame.getBoundingClientRect();
         const x = (e.clientX-(r.left+r.width/2))/r.width;
         const y = (e.clientY-(r.top+r.height/2))/r.height;
-        frame.style.transform = `perspective(900px) rotateY(${x*7}deg) rotateX(${-y*7}deg)`;
+        frame.style.transform = `perspective(1000px) rotateY(${x*5}deg) rotateX(${-y*5}deg)`;
       });
       stage.addEventListener('mouseleave',()=>frame.style.transform='');
     }
@@ -428,18 +454,18 @@
       const d = document.getElementById('done');
       let badge='soft', title='', text='';
       if (status==='yes'){
-        badge='ok'; title='נתראה בשמחה! 🎉';
+        badge='ok'; title='נתראה בשמחה';
         text = 'רשמנו ' + adults + ' מבוגרים' + (children ? ' ו-' + children + ' ילדים' : '') + '.';
         burst();
       } else if (status==='no'){
         title='חבל שלא תוכלו להגיע'; text='תמיד אפשר לשנות את התשובה דרך הקישור הזה.';
       } else {
-        title='אין בעיה'; text='נזכיר לכם שוב בעוד כשבוע 🙂';
+        title='אין בעיה'; text='נזכיר לכם שוב בעוד כשבוע.';
       }
       d.innerHTML = `
         <div class="badge ${badge}">${badge==='ok'
           ? '<svg viewBox="0 0 24 24"><path class="checkmark" d="M4 12.5l5 5L20 6.5"/></svg>'
-          : '<span style="font-size:30px">🕒</span>'}</div>
+          : '<b>·</b>'}</div>
         <h2>${title}</h2><p>${text}</p>`;
       d.classList.remove('hidden');
     }
@@ -447,24 +473,26 @@
     function fail(){
       document.getElementById('loading').classList.add('hidden');
       const d = document.getElementById('done');
-      d.innerHTML = `<div class="badge soft"><span style="font-size:30px">😕</span></div>
+      d.innerHTML = `<div class="badge soft"><b>!</b></div>
         <h2>משהו השתבש</h2><p>נסו לרענן את הדף ולנסות שוב.</p>`;
       d.classList.remove('hidden');
       document.getElementById('choose').classList.remove('hidden');
     }
 
     function burst(){
-      if (typeof confetti !== 'function') return;
-      const colors = ['#38E07B','#7CF0A9','#FFFFFF','#FFCF6B'];
-      confetti({ particleCount:90, spread:75, origin:{y:.6}, colors });
-      setTimeout(()=>confetti({ particleCount:60, angle:60, spread:60, origin:{x:0,y:.65}, colors }),150);
-      setTimeout(()=>confetti({ particleCount:60, angle:120, spread:60, origin:{x:1,y:.65}, colors }),300);
+      if (typeof confetti !== 'function' || reduce) return;
+      const colors = ['#3BE0CB','#F0F4F3','#2FCB86','#7FE9FF'];
+      confetti({ particleCount:80, spread:70, origin:{y:.62}, colors, scalar:.9 });
+      setTimeout(()=>confetti({ particleCount:50, angle:60,  spread:55, origin:{x:0,y:.65}, colors, scalar:.9 }),150);
+      setTimeout(()=>confetti({ particleCount:50, angle:120, spread:55, origin:{x:1,y:.65}, colors, scalar:.9 }),300);
     }
 
-    function daysUntil(iso){
-      if(!iso) return 0;
-      const then = new Date(iso), now = new Date();
-      return Math.max(0, Math.ceil((then - now) / 86400000));
+    /* dd.mm.yyyy משמאל לימין */
+    function dmy(c){
+      if (c.dateText) return c.dateText;
+      if (!c.dateISO) return '';
+      const d = new Date(c.dateISO);
+      return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
     }
     function esc(s){
       return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
