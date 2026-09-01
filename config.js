@@ -17,7 +17,7 @@ window.APP_CONFIG = {
   /* ---- תמונת ההזמנה ----
    * קובץ בתיקיית assets/ (מומלץ), או קישור מלא לתמונה.
    */
-  invitationImage: 'assets/invitation.jpg',
+  invitationImage: 'invitation.jpg',
 
   /* ---- ניווט ל-Waze ----
    * חיפוש חופשי — Waze מוצא לפי שם + כתובת.
