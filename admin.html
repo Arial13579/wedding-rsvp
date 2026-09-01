@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>דשבורד אישורי הגעה · אריאל & מירב</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --green:#38E07B; --red:#FF6A5C; --amber:#FFCF6B; --gray:#8E8E99; --blue:#66D2FF;
+      --ink:#fff; --ink-2:rgba(236,236,248,.62); --ink-3:rgba(236,236,248,.34);
+      --glass:rgba(255,255,255,.06); --glass-2:rgba(255,255,255,.11);
+      --brd:rgba(255,255,255,.13); --r:20px;
+    }
+    *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+    body{font-family:'Assistant',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      color:var(--ink); background:#0a0812; min-height:100vh; -webkit-font-smoothing:antialiased;}
+    .aurora{position:fixed; inset:-30%; z-index:-1; filter:blur(10px);
+      background:
+        radial-gradient(40% 34% at 16% 12%, rgba(120,255,190,.16), transparent 60%),
+        radial-gradient(42% 36% at 86% 10%, rgba(190,130,255,.18), transparent 60%),
+        radial-gradient(50% 44% at 60% 100%, rgba(90,150,255,.14), transparent 62%),
+        #0a0812;
+      animation:drift 30s ease-in-out infinite alternate;}
+    @keyframes drift{0%{transform:scale(1)}100%{transform:scale(1.12) rotate(5deg)}}
+
+    .glass{background:var(--glass); border:1px solid var(--brd); border-radius:var(--r);
+      -webkit-backdrop-filter:blur(26px) saturate(1.6); backdrop-filter:blur(26px) saturate(1.6);
+      box-shadow:0 20px 50px -26px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.11);}
+
+    /* ─── שער כניסה ─── */
+    .gate{min-height:100vh; display:grid; place-items:center; padding:24px;}
+    .gate .card{max-width:360px; width:100%; padding:34px 28px; text-align:center;}
+    .gate h1{font-size:21px; font-weight:800; margin-bottom:6px;}
+    .gate p{color:var(--ink-2); font-size:13.5px; margin-bottom:22px; line-height:1.5;}
+    .gate .err{color:var(--red); font-size:13px; margin-top:14px; font-weight:600;}
+    .g-btn{width:100%; border:0; border-radius:14px; padding:13px; font-family:inherit; font-weight:700;
+      font-size:15px; color:#1a1a1a; background:#fff; cursor:pointer; display:flex; align-items:center;
+      justify-content:center; gap:9px; transition:transform .15s;}
+    .g-btn:active{transform:scale(.96);}
+
+    /* ─── שלד ─── */
+    header{position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between;
+      gap:12px; padding:calc(env(safe-area-inset-top) + 14px) 18px 14px;
+      background:rgba(10,8,18,.7); -webkit-backdrop-filter:blur(22px); backdrop-filter:blur(22px);
+      border-bottom:1px solid rgba(255,255,255,.08);}
+    header h1{font-size:17px; font-weight:800;}
+    header .sub{font-size:11px; color:var(--ink-2); margin-top:2px;}
+    header .hbtns{display:flex; gap:8px;}
+    header button{font-family:inherit; font-weight:700; font-size:13px; color:#fff; cursor:pointer;
+      background:var(--glass-2); border:1px solid var(--brd); border-radius:12px; padding:8px 13px; transition:transform .15s;}
+    header button:active{transform:scale(.94);}
+
+    .wrap{max-width:1120px; margin:0 auto; padding:16px 14px calc(env(safe-area-inset-bottom) + 44px);
+      display:flex; flex-direction:column; gap:13px;}
+
+    /* ─── ייבוא אקסל ─── */
+    .import{padding:16px 18px;}
+    .import h3{font-size:14px; font-weight:800; margin-bottom:4px;}
+    .import p{font-size:12px; color:var(--ink-2); margin-bottom:12px;}
+    .drop{border:1.5px dashed var(--brd); border-radius:16px; padding:22px 16px; text-align:center;
+      color:var(--ink-2); font-size:13.5px; font-weight:600; cursor:pointer; transition:.2s;}
+    .drop:hover,.drop.over{border-color:var(--green); color:var(--ink); background:rgba(56,224,123,.06);}
+    .import .msg{margin-top:10px; font-size:12.5px; font-weight:700;}
+    .import .msg.ok{color:var(--green);} .import .msg.bad{color:var(--red);}
+
+    /* ─── KPI ─── */
+    .kpis{display:grid; grid-template-columns:repeat(2,1fr); gap:11px;}
+    @media(min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
+    .kpi{padding:16px;}
+    .kpi .label{font-size:12px; color:var(--ink-2); font-weight:700; margin-bottom:7px;}
+    .kpi .value{font-size:30px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums;}
+    .kpi .note{font-size:11px; color:var(--ink-3); margin-top:6px; line-height:1.4;}
+    .kpi.g .value{color:var(--green);} .kpi.r .value{color:var(--red);}
+    .kpi.a .value{color:var(--amber);} .kpi.b .value{color:var(--blue);}
+
+    /* ─── גרפים ─── */
+    .charts{display:grid; grid-template-columns:1fr; gap:13px;}
+    @media(min-width:760px){.charts{grid-template-columns:1fr 1fr;}}
+    .chart-card{padding:16px;}
+    .chart-card h3{font-size:13.5px; font-weight:800; margin-bottom:12px; color:rgba(255,255,255,.9);}
+    .chart-box{position:relative; height:230px;}
+
+    /* ─── טבלה ─── */
+    .table-card{padding:15px;}
+    .tools{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:13px;}
+    .tools input{flex:1; min-width:140px; font-family:inherit; font-size:14px; color:#fff;
+      background:rgba(255,255,255,.07); border:1px solid var(--brd); border-radius:12px; padding:9px 12px;}
+    .tools input::placeholder{color:var(--ink-3);}
+    .sbtn{font-family:inherit; font-weight:700; font-size:13px; color:#fff; cursor:pointer; border:0;
+      border-radius:12px; padding:9px 13px; transition:transform .15s;}
+    .sbtn:active{transform:scale(.95);}
+    .sbtn.all{background:linear-gradient(135deg,#3EDB6E,#1FA84C);}
+    .sbtn.sel{background:var(--glass-2); border:1px solid var(--brd);}
+    .sbtn.maybe{background:linear-gradient(105deg,#3EDB6E 0 45%,#FFCF6B 50%,#FF6A5C 55% 100%);}
+    .selc{font-size:12px; color:var(--ink-3);}
+    .tbl-scroll{overflow-x:auto; margin:0 -15px; padding:0 15px;}
+    table{width:100%; border-collapse:collapse; font-size:13px; white-space:nowrap;}
+    th,td{padding:10px 11px; text-align:right;}
+    th{color:var(--ink-2); font-weight:700; font-size:11.5px; border-bottom:1px solid rgba(255,255,255,.12);}
+    tbody tr{border-bottom:1px solid rgba(255,255,255,.06);}
+    .pill{padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700; display:inline-block;}
+    .pill.yes{background:rgba(56,224,123,.18); color:#5fe39a;}
+    .pill.no{background:rgba(255,106,92,.16); color:#ff8b80;}
+    .pill.maybe{background:rgba(255,207,107,.16); color:var(--amber);}
+    .pill.pending{background:rgba(236,236,248,.1); color:var(--ink-2);}
+    .rowbtn{font-family:inherit; font-weight:700; font-size:12px; color:#fff; text-decoration:none;
+      display:inline-block; padding:6px 11px; border-radius:10px; background:linear-gradient(135deg,#3EDB6E,#1FA84C);}
+    .rowbtn.sent{background:rgba(255,255,255,.13);}
+    .muted{color:var(--ink-3);}
+    .loading{text-align:center; padding:34px; color:var(--ink-2); font-weight:600;}
+    input[type=checkbox]{width:16px; height:16px; accent-color:var(--green);}
+    .hidden{display:none !important;}
+    .banner{padding:11px 14px; border-radius:14px; font-size:12.5px; font-weight:700;
+      background:rgba(255,207,107,.12); color:var(--amber); border:1px solid rgba(255,207,107,.3);}
+  </style>
+</head>
+<body>
+  <div class="aurora"></div>
+
+  <!-- ═══ שער כניסה ═══ -->
+  <div id="gate" class="gate">
+    <div class="glass card">
+      <h1>דשבורד אישורי הגעה</h1>
+      <p>הכניסה למנהלי האירוע בלבד.<br>התחברו עם חשבון Google.</p>
+      <button class="g-btn" id="signInBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.8-6.8C35.6 2.4 30.2 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.9 6.1C12.3 13.3 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.1 5.3-4.6 7l7.1 5.5c4.2-3.9 6.6-9.6 6.6-16z"/><path fill="#FBBC05" d="M10.4 28.6c-.5-1.5-.8-3-.8-4.6s.3-3.1.8-4.6l-7.9-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.1-5.5c-2 1.4-4.6 2.2-8.1 2.2-6.3 0-11.7-3.8-13.6-9.4l-7.9 6.1C6.4 42.6 14.6 48 24 48z"/></svg>
+        התחברות עם Google
+      </button>
+      <div id="gateErr" class="err hidden"></div>
+    </div>
+  </div>
+
+  <!-- ═══ אפליקציה ═══ -->
+  <div id="app" class="hidden">
+    <header>
+      <div>
+        <h1 id="hTitle">אישורי הגעה</h1>
+        <div class="sub" id="hSync">טוען…</div>
+      </div>
+      <div class="hbtns">
+        <button id="refreshBtn">רענון</button>
+        <button id="signOutBtn">יציאה</button>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <div id="cfgWarn" class="banner hidden"></div>
+
+      <div class="glass import">
+        <h3>ייבוא רשימת אורחים מאקסל</h3>
+        <p>קובץ עם עמודה A = שם, עמודה B = טלפון. שורת כותרת מזוהה אוטומטית. אורח שכבר קיים (לפי טלפון) לא ישוכפל.</p>
+        <label class="drop" id="drop">
+          גררו לכאן קובץ .xlsx / .xls / .csv — או לחצו לבחירה
+          <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
+        </label>
+        <div id="importMsg" class="msg"></div>
+      </div>
+
+      <div class="kpis" id="kpis"><div class="loading" style="grid-column:1/-1">טוען נתונים…</div></div>
+
+      <div class="charts">
+        <div class="glass chart-card"><h3>התפלגות סטטוס הגעה</h3><div class="chart-box"><canvas id="statusChart"></canvas></div></div>
+        <div class="glass chart-card"><h3>מבוגרים מול ילדים (מאושרים)</h3><div class="chart-box"><canvas id="ageChart"></canvas></div></div>
+      </div>
+
+      <div class="glass table-card">
+        <div class="tools">
+          <input type="search" id="search" placeholder="חיפוש לפי שם / טלפון">
+          <button class="sbtn all"   id="sendAll">שלח לכולם</button>
+          <button class="sbtn sel"   id="sendSel">שלח לנבחרים</button>
+          <button class="sbtn maybe" id="sendMaybe">שלח ל"אולי"</button>
+          <span class="selc" id="selCount"></span>
+        </div>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox" id="selAll"></th>
+              <th>שם</th><th>טלפון</th><th>שליחה</th><th>הגעה</th>
+              <th>מבוגרים</th><th>ילדים</th><th>סה"כ</th><th>עודכן</th><th></th>
+            </tr></thead>
+            <tbody id="tbody"><tr><td colspan="10" class="loading">טוען…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script type="module">
+    const cfg = window.APP_CONFIG || {};
+    const APP  = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    const AUTH = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+    const FS   = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const LABELS = { yes:'מגיע', no:'לא מגיע', maybe:'אולי', pending:'ממתין' };
+    let db, auth, guestsCol, GUESTS = [], statusChart, ageChart, unsub = null;
+
+    document.getElementById('hTitle').textContent = 'אישורי הגעה · ' + (cfg.couple || '');
+
+    /* ── בדיקת הגדרות ── */
+    if (!cfg.firebase || !cfg.firebase.apiKey){
+      showGateError('לא הוגדר Firebase. ערכו את הקובץ config.js לפי ההוראות ב-README.');
+    } else {
+      initFirebase();
+    }
+
+    async function initFirebase(){
+      const [{ initializeApp }, authMod, fsMod] = await Promise.all([ import(APP), import(AUTH), import(FS) ]);
+      const app = initializeApp(cfg.firebase);
+      auth = authMod.getAuth(app);
+      db   = fsMod.getFirestore(app);
+      guestsCol = fsMod.collection(db, 'guests');
+
+      document.getElementById('signInBtn').addEventListener('click', async ()=>{
+        try{ await authMod.signInWithPopup(auth, new authMod.GoogleAuthProvider()); }
+        catch(e){ showGateError('ההתחברות נכשלה: ' + (e.code||e.message)); }
+      });
+      document.getElementById('signOutBtn').addEventListener('click', ()=> authMod.signOut(auth));
+
+      authMod.onAuthStateChanged(auth, user=>{
+        if (!user) return showGate();
+        if (cfg.adminEmail && user.email !== cfg.adminEmail){
+          authMod.signOut(auth);
+          return showGateError('החשבון ' + user.email + ' אינו מורשה.');
+        }
+        showApp(user);
+        startLiveData(fsMod);
+      });
+    }
+
+    /* ── מסכים ── */
+    function showGate(){ document.getElementById('gate').classList.remove('hidden'); document.getElementById('app').classList.add('hidden'); }
+    function showGateError(msg){
+      showGate();
+      const e = document.getElementById('gateErr'); e.textContent = msg; e.classList.remove('hidden');
+    }
+    function showApp(user){
+      document.getElementById('gate').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('hSync').textContent = user.email;
+      if (!cfg.siteUrl){
+        const w = document.getElementById('cfgWarn');
+        w.textContent = 'שדה siteUrl ריק ב-config.js — הקישורים בוואטסאפ לא יעבדו עד שתמלאו אותו.';
+        w.classList.remove('hidden');
+      }
+    }
+
+    /* ── נתונים חיים ── */
+    function startLiveData(fs){
+      if (unsub) unsub();
+      unsub = fs.onSnapshot(fs.query(guestsCol, fs.orderBy('name')), snap=>{
+        GUESTS = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+        document.getElementById('hSync').textContent = 'סונכרן ' + new Date().toLocaleTimeString('he-IL');
+        renderKpis(); renderCharts(); renderTable();
+      }, err=>{
+        console.error(err);
+        document.getElementById('tbody').innerHTML = '<tr><td colspan="10" class="loading">שגיאת הרשאות — בדקו את firestore.rules</td></tr>';
+      });
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', ()=> location.reload());
+
+    /* ── חישוב סטטיסטיקה ── */
+    function stats(){
+      const s = { total:GUESTS.length, yes:0, no:0, maybe:0, pending:0, sent:0, adults:0, children:0, heads:0 };
+      GUESTS.forEach(g=>{
+        if (g.sent) s.sent++;
+        const st = g.status || 'pending';
+        s[st] = (s[st]||0) + 1;
+        if (st === 'yes'){
+          s.adults   += (+g.adults||0);
+          s.children += (+g.children||0);
+          s.heads    += (+g.total || (+g.adults||0)+(+g.children||0));
+        }
+      });
+      return s;
+    }
+
+    function renderKpis(){
+      const s = stats();
+      document.getElementById('kpis').innerHTML =
+        kpi('g','אישרו הגעה', s.yes, s.heads + ' נפשות · ' + s.adults + ' מבוגרים, ' + s.children + ' ילדים') +
+        kpi('r','לא מגיעים', s.no, '') +
+        kpi('a','סימנו "אולי"', s.maybe, '') +
+        kpi('b','הודעות שנשלחו', s.sent, 'נותרו ' + s.pending + ' ללא תשובה');
+    }
+    function kpi(c,label,val,note){
+      return '<div class="glass kpi '+c+'"><div class="label">'+label+'</div><div class="value">'+val+'</div>'+
+             (note?'<div class="note">'+note+'</div>':'')+'</div>';
+    }
+
+    function renderCharts(){
+      const s = stats();
+      Chart.defaults.color = 'rgba(236,236,248,.6)';
+      Chart.defaults.font.family = "'Assistant', sans-serif";
+
+      const sd = { labels:['מגיע','לא מגיע','אולי','ממתין'],
+        datasets:[{ data:[s.yes,s.no,s.maybe,s.pending],
+          backgroundColor:['#38E07B','#FF6A5C','#FFCF6B','#8E8E99'], borderWidth:0, hoverOffset:6 }] };
+      if (statusChart){ statusChart.data = sd; statusChart.update(); }
+      else statusChart = new Chart(document.getElementById('statusChart'), { type:'doughnut', data:sd,
+        options:{ maintainAspectRatio:false, cutout:'62%',
+          plugins:{ legend:{ position:'bottom', labels:{ padding:14, usePointStyle:true, pointStyle:'circle' } } } } });
+
+      const ad = { labels:['מבוגרים','ילדים'],
+        datasets:[{ data:[s.adults,s.children], backgroundColor:['#66D2FF','#38E07B'], borderRadius:10, borderWidth:0, barPercentage:.55 }] };
+      if (ageChart){ ageChart.data = ad; ageChart.update(); }
+      else ageChart = new Chart(document.getElementById('ageChart'), { type:'bar', data:ad,
+        options:{ maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+          scales:{ y:{ beginAtZero:true, ticks:{ precision:0 }, grid:{ color:'rgba(255,255,255,.07)' } }, x:{ grid:{ display:false } } } } });
+    }
+
+    /* ── טבלה ── */
+    const $search = document.getElementById('search');
+    $search.addEventListener('input', renderTable);
+    document.getElementById('selAll').addEventListener('click', e=>{
+      document.querySelectorAll('.rc').forEach(c=> c.checked = e.target.checked);
+      updateSel();
+    });
+
+    function renderTable(){
+      const q = ($search.value||'').trim();
+      const rows = GUESTS.filter(g => !q || (g.name&&g.name.includes(q)) || (g.phone&&String(g.phone).includes(q)));
+      const tb = document.getElementById('tbody');
+      if (!rows.length){ tb.innerHTML = '<tr><td colspan="10" class="loading">אין אורחים — ייבאו קובץ אקסל למעלה</td></tr>'; updateSel(); return; }
+      tb.innerHTML = rows.map(g=>{
+        const st = g.status || 'pending';
+        const btn = cfg.siteUrl && g.phone
+          ? '<a class="rowbtn '+(g.sent?'sent':'')+'" href="'+waLink(g)+'" target="_blank" data-send="'+g.id+'">'+(g.sent?'שלח שוב':'שלח')+'</a>'
+          : '<span class="muted">—</span>';
+        return '<tr>'+
+          '<td><input type="checkbox" class="rc" value="'+g.id+'"></td>'+
+          '<td>'+esc(g.name)+'</td><td class="muted">'+esc(g.phone)+'</td>'+
+          '<td>'+(g.sent?'✅':'⬜')+'</td>'+
+          '<td><span class="pill '+st+'">'+LABELS[st]+'</span></td>'+
+          '<td>'+(g.adults||'')+'</td><td>'+(g.children||'')+'</td><td>'+(g.total||'')+'</td>'+
+          '<td class="muted">'+fmtDate(g.updatedAt)+'</td><td>'+btn+'</td></tr>';
+      }).join('');
+      document.querySelectorAll('.rc').forEach(c=> c.addEventListener('change', updateSel));
+      document.querySelectorAll('[data-send]').forEach(a=> a.addEventListener('click', ()=> markSent([a.dataset.send])));
+      updateSel();
+    }
+    function updateSel(){
+      const n = document.querySelectorAll('.rc:checked').length;
+      document.getElementById('selCount').textContent = n ? n + ' נבחרו' : '';
+    }
+
+    /* ── שליחה בוואטסאפ ── */
+    function toIntl(raw){
+      let d = String(raw||'').replace(/\D/g,'');
+      if (d.startsWith('00')) d = d.slice(2);
+      if (d.startsWith('972')) return d;
+      if (d.startsWith('0')) return '972' + d.slice(1);
+      if (d.length === 9) return '972' + d;
+      return d;
+    }
+    function inviteText(g){
+      const link = (cfg.siteUrl||'').replace(/\/$/,'') + '/guest.html?id=' + encodeURIComponent(g.id);
+      return 'שלום ' + (g.name||'') + ' 💍\n' +
+             'אתם מוזמנים לחתונה של ' + (cfg.couple||'') + ' — ' + (cfg.dateText||'') + ', ב' + (cfg.venueName||'') + '.\n' +
+             'לאישור הגעה ולניווט למקום:\n' + link;
+    }
+    function waLink(g){ return 'https://wa.me/' + toIntl(g.phone) + '?text=' + encodeURIComponent(inviteText(g)); }
+
+    async function sendBatch(list){
+      list = list.filter(g => g.phone);
+      if (!list.length) return alert('אין אורחים עם טלפון בקבוצה הזו.');
+      if (!cfg.siteUrl) return alert('מלאו קודם את siteUrl ב-config.js.');
+      if (!confirm('ייפתחו ' + list.length + ' חלונות WhatsApp — צריך ללחוץ "שלח" בכל אחד. להמשיך?')) return;
+      list.forEach((g,i)=> setTimeout(()=> window.open(waLink(g), '_blank'), i*900));
+      await markSent(list.map(g=>g.id));
+    }
+    document.getElementById('sendAll').addEventListener('click', ()=> sendBatch(GUESTS.slice()));
+    document.getElementById('sendMaybe').addEventListener('click', ()=> sendBatch(GUESTS.filter(g=>g.status==='maybe')));
+    document.getElementById('sendSel').addEventListener('click', ()=>{
+      const ids = new Set([...document.querySelectorAll('.rc:checked')].map(c=>c.value));
+      sendBatch(GUESTS.filter(g=> ids.has(g.id)));
+    });
+
+    async function markSent(ids){
+      const fs = await import(FS);
+      const batch = fs.writeBatch(db);
+      ids.forEach(id => batch.update(fs.doc(db,'guests',id), { sent:true, sentAt: fs.serverTimestamp() }));
+      try{ await batch.commit(); }catch(e){ console.error(e); }
+    }
+
+    /* ── ייבוא אקסל ── */
+    const drop = document.getElementById('drop'), fileInput = document.getElementById('file');
+    drop.addEventListener('click', ()=> fileInput.click());
+    ['dragover','dragenter'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
+    ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
+    drop.addEventListener('drop', e=>{ if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', e=>{ if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+    async function handleFile(file){
+      const msg = document.getElementById('importMsg');
+      msg.className = 'msg'; msg.textContent = 'קורא את הקובץ…';
+      try{
+        const buf = await file.arrayBuffer();
+        const wb  = XLSX.read(buf, { type:'array' });
+        const ws  = wb.Sheets[wb.SheetNames[0]];
+        let rows  = XLSX.utils.sheet_to_json(ws, { header:1, blankrows:false });
+
+        // דילוג על שורת כותרת
+        if (rows.length && /שם|name|טלפון|phone/i.test(String(rows[0][0]) + String(rows[0][1]||''))) rows = rows.slice(1);
+
+        const parsed = rows
+          .map(r => ({ name:String(r[0]||'').trim(), phone:String(r[1]||'').trim() }))
+          .filter(r => r.name);
+        if (!parsed.length){ msg.className='msg bad'; msg.textContent='לא נמצאו שורות תקינות (עמודה A=שם, B=טלפון).'; return; }
+
+        const fs = await import(FS);
+        const existingPhones = new Set(GUESTS.map(g=> toIntl(g.phone)).filter(Boolean));
+        const usedIds = new Set(GUESTS.map(g=> g.id));
+        const toAdd = parsed.filter(r => !r.phone || !existingPhones.has(toIntl(r.phone)));
+        const skipped = parsed.length - toAdd.length;
+
+        if (!toAdd.length){ msg.className='msg ok'; msg.textContent='כל ' + parsed.length + ' האורחים כבר קיימים — לא נוסף דבר.'; return; }
+
+        let batch = fs.writeBatch(db), n = 0, committed = 0;
+        for (const r of toAdd){
+          const id = makeId(usedIds);
+          batch.set(fs.doc(db,'guests',id), {
+            name:r.name, phone:r.phone, status:'pending', adults:0, children:0, total:0,
+            sent:false, createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp()
+          });
+          if (++n === 400){ await batch.commit(); committed += n; n = 0; batch = fs.writeBatch(db); }
+        }
+        if (n) await batch.commit();
+        msg.className = 'msg ok';
+        msg.textContent = 'נוספו ' + toAdd.length + ' אורחים' + (skipped ? ' · ' + skipped + ' כבר היו קיימים' : '') + '.';
+      }catch(e){
+        console.error(e); msg.className='msg bad'; msg.textContent='שגיאה בקריאת הקובץ: ' + e.message;
+      }
+    }
+    function makeId(used){
+      const a = 'abcdefghjkmnpqrstuvwxyz23456789';
+      let id;
+      do { id = Array.from({length:6}, ()=> a[Math.random()*a.length|0]).join(''); } while (used.has(id));
+      used.add(id); return id;
+    }
+
+    /* ── עזר ── */
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+    function fmtDate(ts){
+      if (!ts) return '';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('he-IL') + ' ' + d.toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    }
+  </script>
+</body>
+</html>
