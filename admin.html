@@ -57,8 +57,8 @@
       gap:12px; padding:calc(env(safe-area-inset-top) + 15px) 18px 15px;
       background:rgba(10,10,12,.72); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
       border-bottom:1px solid var(--edge);}
-    header h1{font-family:var(--serif); font-size:18px; font-weight:400; letter-spacing:.3px;}
-    header .sub{font-size:10.5px; color:var(--text-2); margin-top:2px; letter-spacing:.3px;}
+    header h1{font-family:var(--serif); font-size:18px; font-weight:400; letter-spacing:.3px; text-align:center;}
+    header .sub{font-size:10.5px; color:var(--text-2); margin-top:2px; letter-spacing:.3px; text-align:center;}
     header .hbtns{display:flex; gap:8px;}
     header button{font-family:var(--sans); font-weight:400; font-size:12.5px; color:var(--text); cursor:pointer;
       background:var(--panel-2); border:1px solid var(--edge); border-radius:11px; padding:8px 13px; transition:transform .15s;}
@@ -67,11 +67,11 @@
     .wrap{max-width:1100px; margin:0 auto; padding:16px 14px calc(env(safe-area-inset-bottom) + 48px);
       display:flex; flex-direction:column; gap:13px;}
 
-    .banner{padding:11px 15px; border-radius:13px; font-size:12px; font-weight:400; line-height:1.5;
+    .banner{padding:11px 15px; border-radius:13px; font-size:12px; font-weight:400; line-height:1.5; text-align:center;
       background:rgba(231,178,75,.1); color:var(--amber); border:1px solid rgba(231,178,75,.28);}
 
     /* ─── ייבוא ─── */
-    .import{padding:17px 19px;}
+    .import{padding:17px 19px; text-align:center;}
     .import h3{font-family:var(--serif); font-size:16px; font-weight:500; margin-bottom:4px;}
     .import p{font-size:11.5px; color:var(--text-2); margin-bottom:13px; line-height:1.5;}
     .drop{border:1px dashed var(--edge-bright); border-radius:14px; padding:22px 16px; text-align:center;
@@ -83,7 +83,7 @@
     /* ─── KPI ─── */
     .kpis{display:grid; grid-template-columns:repeat(2,1fr); gap:11px;}
     @media(min-width:760px){.kpis{grid-template-columns:repeat(4,1fr);}}
-    .kpi{padding:17px;}
+    .kpi{padding:17px; text-align:center;}
     .kpi .label{font-size:11px; color:var(--text-2); font-weight:400; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:9px;}
     .kpi .value{font-family:var(--serif); font-size:32px; font-weight:300; line-height:1; font-variant-numeric:tabular-nums; color:var(--text);}
     .kpi .note{font-size:10.5px; color:var(--text-3); margin-top:7px; line-height:1.4;}
@@ -94,7 +94,7 @@
     .charts{display:grid; grid-template-columns:1fr; gap:13px;}
     @media(min-width:760px){.charts{grid-template-columns:1fr 1fr;}}
     .chart-card{padding:17px;}
-    .chart-card h3{font-family:var(--serif); font-size:15px; font-weight:400; margin-bottom:12px; color:var(--text);}
+    .chart-card h3{font-family:var(--serif); font-size:15px; font-weight:400; margin-bottom:12px; color:var(--text); text-align:center;}
     .chart-box{position:relative; height:230px;}
 
     /* ─── טבלה ─── */
@@ -109,13 +109,13 @@
       -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);}
     .sbtn:hover{filter:brightness(1.1);}
     .sbtn:active{transform:scale(.95);}
-    .sbtn.all{background:linear-gradient(135deg,rgba(55,208,138,.9),rgba(28,158,104,.8));}
+    .sbtn.all{background:linear-gradient(135deg,rgba(31,141,89,.95),rgba(12,82,53,.92));}
     .sbtn.sel{background:var(--panel-2);}
-    .sbtn.maybe{background:linear-gradient(105deg,rgba(55,208,138,.85) 0 45%,rgba(231,178,75,.9) 50%,rgba(242,114,106,.85) 55% 100%);}
+    .sbtn.maybe{background:linear-gradient(105deg,rgba(31,141,89,.9) 0 45%,rgba(179,131,28,.92) 50%,rgba(176,74,66,.9) 55% 100%);}
     .selc{font-size:11.5px; color:var(--text-3);}
     .tbl-scroll{overflow-x:auto; margin:0 -16px; padding:0 16px;}
     table{width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap;}
-    th,td{padding:11px 11px; text-align:right;}
+    th,td{padding:11px 11px; text-align:center;}
     th{color:var(--text-2); font-weight:400; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid var(--edge);}
     tbody tr{border-bottom:1px solid rgba(255,255,255,.05);}
     .pill{padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:500; display:inline-block; letter-spacing:.3px;}
@@ -125,7 +125,7 @@
     .pill.pending{background:rgba(244,242,236,.08); color:var(--text-2);}
     .rowbtn{font-family:var(--sans); font-weight:500; font-size:11.5px; color:#fff; text-decoration:none;
       display:inline-block; padding:6px 12px; border-radius:9px; border:1px solid var(--edge-bright);
-      background:linear-gradient(135deg,rgba(55,208,138,.85),rgba(28,158,104,.75));}
+      background:linear-gradient(135deg,rgba(31,141,89,.9),rgba(12,82,53,.85));}
     .rowbtn.sent{background:rgba(255,255,255,.06);}
     .muted{color:var(--text-3);}
     .loading{text-align:center; padding:34px; color:var(--text-2); font-family:var(--serif); font-weight:300; font-size:15px; letter-spacing:.5px;}
@@ -304,25 +304,103 @@
              (note?'<div class="note">'+note+'</div>':'')+'</div>';
     }
 
+    /* ─── כלים ל"3D" ─── */
+    function shade(hex, pct){
+      const f = parseInt(hex.slice(1),16), t = pct<0?0:255, p = Math.abs(pct);
+      const R = f>>16, G = f>>8&0x00FF, B = f&0x0000FF;
+      return '#'+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
+    }
+    function glossFill(chart, hex){
+      const area = chart.chartArea;
+      if (!area) return hex;
+      const g = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+      g.addColorStop(0, shade(hex, .45));
+      g.addColorStop(.55, hex);
+      g.addColorStop(1, shade(hex, -.3));
+      return g;
+    }
+    const dropShadowPlugin = {
+      id:'dropShadow3d',
+      beforeDatasetsDraw(chart){
+        chart.ctx.save();
+        chart.ctx.shadowColor = 'rgba(0,0,0,.55)';
+        chart.ctx.shadowBlur = 16;
+        chart.ctx.shadowOffsetY = 9;
+      },
+      afterDatasetsDraw(chart){ chart.ctx.restore(); }
+    };
+    const glossHighlightPlugin = {
+      id:'glossHighlight3d',
+      afterDatasetsDraw(chart){
+        const area = chart.chartArea;
+        if (!area) return;
+        const ctx = chart.ctx;
+        const cx = (area.left+area.right)/2, cy = (area.top+area.bottom)/2;
+        const r = Math.min(area.right-area.left, area.bottom-area.top)/2;
+        ctx.save();
+        const g = ctx.createRadialGradient(cx-r*.35, cy-r*.5, 2, cx-r*.1, cy-r*.15, r*.95);
+        g.addColorStop(0, 'rgba(255,255,255,.24)');
+        g.addColorStop(.4, 'rgba(255,255,255,.05)');
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.fillStyle = g; ctx.fill();
+        ctx.restore();
+      }
+    };
+    const DEPTH = 9;
+    const extrude3dPlugin = {
+      id:'extrude3d',
+      afterDatasetsDraw(chart){
+        if (chart.config.type !== 'bar') return;
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        const colors = chart.data.datasets[0]._baseColors || [];
+        meta.data.forEach((bar,i)=>{
+          const hex = colors[i] || '#3BE0CB';
+          const top = bar.y, bottom = bar.base, left = bar.x-bar.width/2, right = bar.x+bar.width/2;
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(right, top); ctx.lineTo(right+DEPTH, top-DEPTH);
+          ctx.lineTo(right+DEPTH, bottom-DEPTH); ctx.lineTo(right, bottom);
+          ctx.closePath(); ctx.fillStyle = shade(hex,-.4); ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(left, top); ctx.lineTo(left+DEPTH, top-DEPTH);
+          ctx.lineTo(right+DEPTH, top-DEPTH); ctx.lineTo(right, top);
+          ctx.closePath(); ctx.fillStyle = shade(hex,.35); ctx.fill();
+          ctx.restore();
+        });
+      }
+    };
+
     function renderCharts(){
       const s = stats();
       Chart.defaults.color = 'rgba(224,240,238,.5)';
       Chart.defaults.font.family = "'Heebo', sans-serif";
       Chart.defaults.borderColor = 'rgba(255,255,255,.06)';
 
+      const statusColors = ['#2FCB86','#F2726A','#E7B24B','#8C8C97'];
       const sd = { labels:['מגיע','לא מגיע','אולי','ממתין'],
         datasets:[{ data:[s.yes,s.no,s.maybe,s.pending],
-          backgroundColor:['#2FCB86','#F2726A','#E7B24B','#8C8C97'], borderWidth:0, hoverOffset:6 }] };
+          backgroundColor:(ctx)=> glossFill(ctx.chart, statusColors[ctx.dataIndex]),
+          borderColor:(ctx)=> shade(statusColors[ctx.dataIndex], -.5),
+          borderWidth:2, hoverOffset:10 }] };
       if (statusChart){ statusChart.data = sd; statusChart.update(); }
       else statusChart = new Chart(document.getElementById('statusChart'), { type:'doughnut', data:sd,
+        plugins:[dropShadowPlugin, glossHighlightPlugin],
         options:{ maintainAspectRatio:false, cutout:'64%',
           plugins:{ legend:{ position:'bottom', labels:{ padding:14, usePointStyle:true, pointStyle:'circle' } } } } });
 
+      const ageColors = ['#3BE0CB','#2FCB86'];
       const ad = { labels:['מבוגרים','ילדים'],
-        datasets:[{ data:[s.adults,s.children], backgroundColor:['#3BE0CB','#2FCB86'], borderRadius:8, borderWidth:0, barPercentage:.5 }] };
+        datasets:[{ data:[s.adults,s.children],
+          backgroundColor:(ctx)=> glossFill(ctx.chart, ageColors[ctx.dataIndex]),
+          borderColor:(ctx)=> shade(ageColors[ctx.dataIndex], -.5), borderWidth:1,
+          _baseColors: ageColors, borderRadius:{topLeft:6,topRight:6}, borderSkipped:false, barPercentage:.5 }] };
       if (ageChart){ ageChart.data = ad; ageChart.update(); }
       else ageChart = new Chart(document.getElementById('ageChart'), { type:'bar', data:ad,
-        options:{ maintainAspectRatio:false, plugins:{ legend:{ display:false } },
+        plugins:[dropShadowPlugin, extrude3dPlugin],
+        options:{ maintainAspectRatio:false, layout:{ padding:{ top:12, right:14 } },
+          plugins:{ legend:{ display:false } },
           scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } }, x:{ grid:{ display:false } } } } });
     }
 
