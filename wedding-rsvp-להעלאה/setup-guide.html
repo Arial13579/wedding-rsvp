@@ -1,0 +1,548 @@
+<title>הקמת מערכת אישורי ההגעה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --ground:#F6F4EF; --surface:#FFFFFF; --surface-2:#EFEDE6;
+    --ink:#1D211B; --ink-soft:#5C6157; --line:#E1DED4;
+    --accent:#137A44; --accent-ink:#0B5A31; --accent-wash:#E6F1E8;
+    --gold:#8A5E10; --gold-wash:#F6EEDC;
+    --code-bg:#181C17; --code-ink:#E8EAE3; --code-dim:#9BB29D;
+    --display:'Frank Ruhl Libre',Georgia,'Times New Roman',serif;
+    --body:'Assistant',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#12140F; --surface:#1A1D17; --surface-2:#22261E;
+      --ink:#ECEEE6; --ink-soft:#A0A69A; --line:#2E332A;
+      --accent:#5AD088; --accent-ink:#8BE0AC; --accent-wash:#1C2A20;
+      --gold:#D8A94A; --gold-wash:#2A2416;
+      --code-bg:#0E110D; --code-ink:#E8EAE3; --code-dim:#7E937F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12140F; --surface:#1A1D17; --surface-2:#22261E;
+    --ink:#ECEEE6; --ink-soft:#A0A69A; --line:#2E332A;
+    --accent:#5AD088; --accent-ink:#8BE0AC; --accent-wash:#1C2A20;
+    --gold:#D8A94A; --gold-wash:#2A2416;
+    --code-bg:#0E110D; --code-ink:#E8EAE3; --code-dim:#7E937F;
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--ground); color:var(--ink); font-family:var(--body);
+    font-size:15.5px; line-height:1.65; margin:0;}
+  .page{max-width:680px; margin:0 auto; padding:0 22px 90px;}
+
+  /* פס התקדמות */
+  .progress{position:sticky; top:0; z-index:50; height:4px; background:var(--line);}
+  .progress__bar{height:100%; width:0; background:var(--accent); transition:width .35s cubic-bezier(.3,.9,.3,1);}
+
+  /* כותרת */
+  .hero{padding:46px 0 30px; border-bottom:1px solid var(--line); margin-bottom:8px;}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase;
+    color:var(--accent-ink); margin:0 0 12px;}
+  h1{font-family:var(--display); font-weight:700; font-size:33px; line-height:1.2;
+    margin:0 0 12px; text-wrap:balance;}
+  .lead{color:var(--ink-soft); font-size:16px; margin:0; max-width:52ch;}
+  .hero__meta{margin-top:20px; font-size:13.5px; color:var(--ink-soft);
+    display:flex; flex-wrap:wrap; gap:8px 18px;}
+  .hero__meta b{color:var(--ink); font-weight:600;}
+
+  /* סקירה */
+  .overview{margin:26px 0 8px; display:grid; gap:10px;}
+  @media(min-width:560px){ .overview{grid-template-columns:1fr 1fr;} }
+  .ov{background:var(--surface); border:1px solid var(--line); border-radius:13px; padding:14px 16px;}
+  .ov h4{margin:0 0 3px; font-size:14.5px; font-weight:700;}
+  .ov p{margin:0; font-size:13px; color:var(--ink-soft);}
+  .ov span{font-family:var(--mono); font-size:11.5px; color:var(--accent-ink); font-weight:500;}
+
+  /* שלב-על */
+  .phase{margin-top:44px;}
+  .phase__head{display:flex; align-items:baseline; gap:12px; padding-bottom:10px;
+    border-bottom:2px solid var(--ink); margin-bottom:8px;}
+  .phase__letter{font-family:var(--display); font-weight:700; font-size:22px; color:var(--accent-ink);}
+  .phase__name{font-weight:700; font-size:16px; letter-spacing:.3px;}
+  .phase__time{margin-inline-start:auto; font-family:var(--mono); font-size:12px; color:var(--ink-soft);}
+
+  /* שלבים */
+  .steps{list-style:none; margin:0; padding:0;}
+  .step{display:flex; gap:15px; padding:22px 0; border-bottom:1px solid var(--line);}
+  .step:last-child{border-bottom:0;}
+  .badge{flex:none; width:36px; height:36px; border-radius:50%; border:2px solid var(--accent);
+    background:transparent; color:var(--accent-ink); font-family:var(--mono); font-size:15px; font-weight:500;
+    display:grid; place-items:center; cursor:pointer; transition:.18s; padding:0;}
+  .badge:hover{background:var(--accent-wash);}
+  .badge:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .step[data-done="1"] .badge{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .step[data-done="1"] .step__body{opacity:.5;}
+  .step__body{min-width:0; flex:1;}
+  .step__body h3{font-family:var(--display); font-weight:500; font-size:19.5px; margin:4px 0 8px; line-height:1.3;}
+  .step__body p{margin:0 0 9px;}
+  .step__body ol,.step__body ul{margin:0 0 9px; padding-inline-start:20px;}
+  .step__body li{margin:5px 0;}
+  .step__body strong{font-weight:700;}
+  kbd{font-family:var(--mono); font-size:.86em; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:5px; padding:1px 6px; white-space:nowrap;}
+  .muted{color:var(--ink-soft); font-size:13.5px;}
+
+  /* קופסאות */
+  .note,.check{border-radius:11px; padding:12px 15px; margin:12px 0; font-size:14px;}
+  .note{background:var(--gold-wash); border-inline-start:3px solid var(--gold);}
+  .note b{color:var(--gold);}
+  .check{background:var(--accent-wash); border-inline-start:3px solid var(--accent);}
+  .check b{color:var(--accent-ink);}
+
+  /* קוד */
+  .code{position:relative; margin:12px 0; direction:ltr;}
+  .code pre{background:var(--code-bg); color:var(--code-ink); font-family:var(--mono); font-size:12.5px;
+    line-height:1.7; padding:16px 18px; border-radius:11px; overflow-x:auto; margin:0;}
+  .code:has(.code__copy) pre{padding-top:44px;}
+  .code code{font-family:inherit;}
+  .code .cm{color:var(--code-dim);}
+  .code__copy{position:absolute; top:9px; right:9px; font-family:var(--body); font-size:12px;
+    font-weight:600; background:rgba(255,255,255,.1); color:#E8EAE3; border:1px solid rgba(255,255,255,.2);
+    border-radius:7px; padding:4px 10px; cursor:pointer; transition:.15s;}
+  .code__copy:hover{background:rgba(255,255,255,.2);}
+  .code__copy.done{background:var(--accent); border-color:var(--accent); color:#fff;}
+
+  /* תקלות */
+  .trouble{margin-top:46px;}
+  .trouble h2{font-family:var(--display); font-weight:700; font-size:22px; border-bottom:2px solid var(--ink);
+    padding-bottom:10px; margin:0 0 6px;}
+  details{border-bottom:1px solid var(--line); padding:14px 0;}
+  summary{cursor:pointer; font-weight:600; font-size:15px; list-style:none;}
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:'+  '; font-family:var(--mono); color:var(--accent-ink);}
+  details[open] summary::before{content:'–  ';}
+  details p{margin:10px 0 0; font-size:14px; color:var(--ink-soft);}
+
+  footer{margin-top:50px; padding-top:22px; border-top:1px solid var(--line);
+    font-size:14px; color:var(--ink-soft); text-align:center;}
+
+  a{color:var(--accent-ink); text-underline-offset:2px;}
+
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+</style>
+
+<div class="progress"><div class="progress__bar" id="pbar"></div></div>
+
+<div class="page" dir="rtl">
+
+  <header class="hero">
+    <p class="eyebrow">מדריך התקנה · פעם אחת</p>
+    <h1>הקמת מערכת אישורי ההגעה</h1>
+    <p class="lead">מכאן ועד אתר חי שאפשר לשלוח לאורחים — לפי הסדר, בלי לדלג. סַמני כל שלב שסיימת (נשמר גם אם סוגרים את הדף).</p>
+    <div class="hero__meta">
+      <span>חשבון: <b>arielkahalani1@gmail.com</b></span>
+      <span>זמן כולל: <b>~30 דקות</b></span>
+      <span>עלות: <b>0 ₪</b></span>
+    </div>
+  </header>
+
+  <section class="overview" aria-label="סקירה">
+    <div class="ov"><h4>שלב A — <span>Firebase</span></h4><p>מסד הנתונים שבו נשמרות התשובות. חינם, בלי כרטיס אשראי.</p></div>
+    <div class="ov"><h4>שלב B — <span>config.js</span></h4><p>מדביקים את המפתחות מ-Firebase לתוך קובץ אחד.</p></div>
+    <div class="ov"><h4>שלב C — <span>GitHub Pages</span></h4><p>מעלים את הקבצים והאתר עולה לאוויר.</p></div>
+    <div class="ov"><h4>שלב D — בדיקה</h4><p>מוודאים שהכל עובד ומייבאים רשימת אורחים ראשונה.</p></div>
+  </section>
+
+  <!-- ═══════════ שלב A ═══════════ -->
+  <section class="phase">
+    <div class="phase__head">
+      <span class="phase__letter">A</span><span class="phase__name">הקמת Firebase</span>
+      <span class="phase__time">~10 דקות</span>
+    </div>
+    <ol class="steps">
+
+      <li class="step" data-k="a1">
+        <button class="badge" type="button" aria-label="סמן שלב 1">1</button>
+        <div class="step__body">
+          <h3>יצירת פרויקט</h3>
+          <ol>
+            <li>נכנסים ל־<a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> ומתחברים עם <strong>arielkahalani1@gmail.com</strong>.</li>
+            <li>לוחצים <kbd>Create a project</kbd> (או <kbd>Add project</kbd> / "צור פרויקט").</li>
+            <li>שם הפרויקט: <kbd>wedding-rsvp</kbd> ← <kbd>Continue</kbd>.</li>
+            <li>אם מופיע מסך על "Gemini in Firebase" או תנאי שימוש — מסמנים אישור ו־<kbd>Continue</kbd>.</li>
+            <li>במסך <strong>Google Analytics</strong> — מכבים את המתג (Off) ← <kbd>Create project</kbd>.</li>
+            <li>ממתינים ~30 שניות ← <kbd>Continue</kbd>.</li>
+          </ol>
+          <div class="check"><b>✓ אמור לקרות:</b> נחתת במסך "Project Overview" עם תפריט צד שמאלי.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="a2">
+        <button class="badge" type="button" aria-label="סמן שלב 2">2</button>
+        <div class="step__body">
+          <h3>יצירת מסד הנתונים (Firestore)</h3>
+          <ol>
+            <li>בתפריט הצד: <kbd>Build</kbd> ← <kbd>Firestore Database</kbd>.</li>
+            <li><kbd>Create database</kbd>.</li>
+            <li>מיקום (Location): בוחרים <kbd>eur3 (europe-west)</kbd> ← <kbd>Next</kbd>.</li>
+            <li>בוחרים <strong>Start in production mode</strong> ← <kbd>Create</kbd> / <kbd>Enable</kbd>.</li>
+          </ol>
+          <div class="note"><b>שים לב:</b> "production mode" זה הנכון — האבטחה תוגדר בשלב 5. "test mode" נפתח לכולם ופג אחרי חודש.</div>
+          <div class="check"><b>✓ אמור לקרות:</b> נפתח מסך עם טאבים <kbd>Data</kbd> · <kbd>Rules</kbd> · <kbd>Indexes</kbd> ומסד ריק.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="a3">
+        <button class="badge" type="button" aria-label="סמן שלב 3">3</button>
+        <div class="step__body">
+          <h3>הפעלת התחברות עם Google</h3>
+          <ol>
+            <li>בתפריט הצד: <kbd>Build</kbd> ← <kbd>Authentication</kbd> ← <kbd>Get started</kbd>.</li>
+            <li>בטאב <kbd>Sign-in method</kbd> — לוחצים על <kbd>Google</kbd> ברשימה.</li>
+            <li>מפעילים את המתג <strong>Enable</strong>.</li>
+            <li>בשדה "Support email" בוחרים <strong>arielkahalani1@gmail.com</strong> ← <kbd>Save</kbd>.</li>
+          </ol>
+          <div class="check"><b>✓ אמור לקרות:</b> ליד "Google" ברשימה מופיע הסטטוס <strong>Enabled</strong>.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="a4">
+        <button class="badge" type="button" aria-label="סמן שלב 4">4</button>
+        <div class="step__body">
+          <h3>רישום אפליקציית ווב + העתקת המפתחות</h3>
+          <ol>
+            <li>למעלה מימין: גלגל השיניים <kbd>⚙</kbd> ← <kbd>Project settings</kbd>.</li>
+            <li>גוללים למטה עד הקטע <strong>Your apps</strong>.</li>
+            <li>לוחצים על אייקון הווב <kbd>&lt;/&gt;</kbd>.</li>
+            <li>כינוי (App nickname): <kbd>wedding</kbd>. <strong>לא</strong> מסמנים "Firebase Hosting". ← <kbd>Register app</kbd>.</li>
+            <li>מופיע בלוק קוד עם <kbd>const firebaseConfig = { ... }</kbd>. <strong>משאירים את החלון פתוח</strong> — צריך את הערכים בשלב B.</li>
+            <li><kbd>Continue to console</kbd>.</li>
+          </ol>
+          <div class="note"><b>המפתחות האלה אינם סוד.</b> מפתח Firebase של אתר הוא מזהה פרויקט, לא סיסמה — מותר לגמרי להעלות אותו ל-GitHub. מי ששומר על המידע הם כללי האבטחה (שלב 5) + התחברות Google.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="a5">
+        <button class="badge" type="button" aria-label="סמן שלב 5">5</button>
+        <div class="step__body">
+          <h3>הדבקת כללי האבטחה</h3>
+          <ol>
+            <li>תפריט הצד: <kbd>Build</kbd> ← <kbd>Firestore Database</kbd> ← טאב <kbd>Rules</kbd>.</li>
+            <li>מוחקים את <strong>כל</strong> מה שכתוב שם.</li>
+            <li>מדביקים במקום את הקוד הבא (כפתור "העתק"):</li>
+          </ol>
+          <div class="code">
+            <button class="code__copy" type="button">העתק</button>
+            <pre dir="ltr"><code>rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /guests/{id} {
+      allow get: if true;
+      allow list, create, delete: if request.auth != null;
+      allow update: if request.auth != null
+        || (
+             request.resource.data.name  == resource.data.name &&
+             request.resource.data.phone == resource.data.phone &&
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status','adults','children','total','updatedAt','remindOn'])
+           );
+    }
+
+    match /meta/{doc} {
+      allow read:  if true;
+      allow write: if request.auth != null;
+    }
+  }
+}</code></pre>
+          </div>
+          <ol start="4"><li>לוחצים <kbd>Publish</kbd>.</li></ol>
+          <div class="check"><b>✓ אמור לקרות:</b> הודעה "Rules published" והתאריך מתעדכן.</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ═══════════ שלב B ═══════════ -->
+  <section class="phase">
+    <div class="phase__head">
+      <span class="phase__letter">B</span><span class="phase__name">עריכת config.js</span>
+      <span class="phase__time">~5 דקות</span>
+    </div>
+    <ol class="steps">
+
+      <li class="step" data-k="b1">
+        <button class="badge" type="button" aria-label="סמן שלב 6">6</button>
+        <div class="step__body">
+          <h3>מילוי הקובץ config.js</h3>
+          <p>פותחים את הקובץ <kbd>config.js</kbd> בתיקייה <kbd>wedding-rsvp</kbd> (לחיצה ימנית ← Open with ← Notepad / VS Code).</p>
+          <p>מתוך החלון של Firebase שנשאר פתוח (שלב 4), מעתיקים כל ערך למקום שלו. כך זה אמור להיראות בסוף — רק ה־6 ערכים של <kbd>firebase</kbd> ו־<kbd>siteUrl</kbd> חסרים כרגע:</p>
+          <div class="code">
+            <button class="code__copy" type="button">העתק</button>
+            <pre dir="ltr"><code>window.APP_CONFIG = {
+  couple:       'אריאל &amp; מירב',
+  dateText:     '22.12.2026',
+  dateISO:      '2026-12-22T19:30:00+02:00',
+  venueName:    'אולמי אלגריה',
+  venueAddress: 'המלך חסן השני 12, קרית עקרון',
+
+  invitationImage: 'assets/invitation.jpg',
+  wazeQuery: 'אולמי אלגריה, המלך חסן השני 12, קרית עקרון',
+
+  <span class="cm">// ⬇ ממלאים אחרי שלב C (GitHub Pages). דוגמה:</span>
+  siteUrl: 'https://USERNAME.github.io/wedding-rsvp',
+
+  adminEmail: 'arielkahalani1@gmail.com',
+  reminderDays: 7,
+
+  <span class="cm">// ⬇ מ־firebaseConfig שבחלון Firebase</span>
+  firebase: {
+    apiKey:            'AIza................................',
+    authDomain:        'wedding-rsvp-xxxxx.firebaseapp.com',
+    projectId:         'wedding-rsvp-xxxxx',
+    storageBucket:     'wedding-rsvp-xxxxx.appspot.com',
+    messagingSenderId: '000000000000',
+    appId:             '1:0000:web:xxxxxxxxxxxx'
+  }
+};</code></pre>
+          </div>
+          <div class="note"><b>שים לב:</b> כל ערך בין גרשיים <kbd>'...'</kbd>, פסיק בסוף כל שורה. אם חסר גרש או פסיק — האתר לא ייטען.</div>
+          <div class="check"><b>✓ כרגע:</b> ממלאים רק את בלוק <kbd>firebase</kbd>. את <kbd>siteUrl</kbd> משאירים ריק <kbd>''</kbd> ונחזור אליו בשלב 10. שומרים את הקובץ.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="b2">
+        <button class="badge" type="button" aria-label="סמן שלב 7">7</button>
+        <div class="step__body">
+          <h3>עדכון תמונת התצוגה בוואטסאפ</h3>
+          <p>זה מה שגורם לקישור להיפתח בוואטסאפ ככרטיס עם תמונת ההזמנה.</p>
+          <p>פותחים את <kbd>guest.html</kbd>, ובראש הקובץ (סביב שורה 12) מחליפים בשתי השורות האלה את <kbd>REPLACE-WITH-YOUR-SITE.github.io/wedding-rsvp</kbd> בכתובת האמיתית — <strong>אחרי</strong> שיש לך אותה משלב 10:</p>
+          <div class="code">
+            <button class="code__copy" type="button">העתק</button>
+            <pre dir="ltr"><code>&lt;meta property="og:image" content="https://USERNAME.github.io/wedding-rsvp/assets/invitation.jpg"&gt;
+&lt;meta property="og:url"   content="https://USERNAME.github.io/wedding-rsvp/guest.html"&gt;</code></pre>
+          </div>
+          <div class="check"><b>✓ אפשר לדחות:</b> אם עדיין אין כתובת אתר — מדלגים ומטפלים בזה בשלב 10 יחד עם <kbd>siteUrl</kbd>.</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ═══════════ שלב C ═══════════ -->
+  <section class="phase">
+    <div class="phase__head">
+      <span class="phase__letter">C</span><span class="phase__name">העלאה ל-GitHub</span>
+      <span class="phase__time">~10 דקות</span>
+    </div>
+    <ol class="steps">
+
+      <li class="step" data-k="c1">
+        <button class="badge" type="button" aria-label="סמן שלב 8">8</button>
+        <div class="step__body">
+          <h3>יצירת repository</h3>
+          <ol>
+            <li>נכנסים ל־<a href="https://github.com" target="_blank" rel="noopener">github.com</a> (אם אין חשבון — נרשמים, חינם).</li>
+            <li>למעלה מימין: <kbd>+</kbd> ← <kbd>New repository</kbd>.</li>
+            <li>Repository name: <kbd>wedding-rsvp</kbd>.</li>
+            <li>בוחרים <strong>Public</strong>.</li>
+            <li><kbd>Create repository</kbd>.</li>
+          </ol>
+          <div class="note"><b>מה זה שם המשתמש (USERNAME):</b> מה שמופיע בכתובת אחרי github.com/ — למשל <kbd>github.com/tehila</kbd> ← השם הוא <kbd>tehila</kbd>. כתובת האתר תהיה <kbd>https://<em>USERNAME</em>.github.io/wedding-rsvp</kbd>.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="c2">
+        <button class="badge" type="button" aria-label="סמן שלב 9">9</button>
+        <div class="step__body">
+          <h3>העלאת הקבצים</h3>
+          <ol>
+            <li>בעמוד ה-repository החדש: <kbd>uploading an existing file</kbd> (או <kbd>Add file</kbd> ← <kbd>Upload files</kbd>).</li>
+            <li>פותחים את תיקיית <kbd>wedding-rsvp</kbd> במחשב, בוחרים את הקבצים והתיקייה האלה וגוררים אותם יחד לחלון הדפדפן:</li>
+          </ol>
+          <div class="code"><pre dir="ltr"><code>guest.html
+admin.html
+config.js
+firestore.rules
+setup-guide.html
+README.md
+.gitignore
+assets/            <span class="cm">(התיקייה כולה — כולל invitation.jpg)</span></code></pre></div>
+          <p><strong>לא</strong> מעלים:</p>
+          <div class="code"><pre dir="ltr"><code>*.xlsx / *.xls / *.csv   <span class="cm">קובץ רשימת האורחים — יש בו טלפונים!</span>
+_p.txt                   <span class="cm">גיבוי ישן</span>
+legacy/                  <span class="cm">אופציונלי — גיבוי הגרסה הישנה</span></code></pre></div>
+          <ol start="3">
+            <li>גוללים למטה ← <kbd>Commit changes</kbd>.</li>
+          </ol>
+          <div class="check"><b>✓ אמור לקרות:</b> בעמוד ה-repository מופיעה רשימת הקבצים ותיקיית <kbd>assets</kbd>.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="c3">
+        <button class="badge" type="button" aria-label="סמן שלב 10">10</button>
+        <div class="step__body">
+          <h3>הפעלת GitHub Pages + סגירת ה-config</h3>
+          <ol>
+            <li>ב-repository: <kbd>Settings</kbd> ← בתפריט הצד <kbd>Pages</kbd>.</li>
+            <li>תחת "Build and deployment": <em>Source</em> = <kbd>Deploy from a branch</kbd>.</li>
+            <li><em>Branch</em> = <kbd>main</kbd>, תיקייה = <kbd>/ (root)</kbd> ← <kbd>Save</kbd>.</li>
+            <li>ממתינים 1–2 דקות, מרעננים — למעלה מופיעה הכתובת:<br><kbd>https://USERNAME.github.io/wedding-rsvp/</kbd></li>
+            <li><strong>עכשיו חוזרים אחורה:</strong> ב-<kbd>config.js</kbd> ממלאים את <kbd>siteUrl</kbd> בכתובת הזו (בלי / בסוף), וב-<kbd>guest.html</kbd> מעדכנים את 2 שורות ה-<kbd>og:</kbd> (שלב 7).</li>
+            <li>מעלים מחדש את 2 הקבצים: <kbd>Add file</kbd> ← <kbd>Upload files</kbd> ← גוררים את <kbd>config.js</kbd> ו-<kbd>guest.html</kbd> המעודכנים (דורס את הקודמים) ← <kbd>Commit changes</kbd>.</li>
+          </ol>
+        </div>
+      </li>
+
+      <li class="step" data-k="c4">
+        <button class="badge" type="button" aria-label="סמן שלב 11">11</button>
+        <div class="step__body">
+          <h3>הרשאת הכתובת ב-Firebase</h3>
+          <ol>
+            <li>חוזרים ל-Firebase Console ← <kbd>Authentication</kbd> ← טאב <kbd>Settings</kbd>.</li>
+            <li>קטע <kbd>Authorized domains</kbd> ← <kbd>Add domain</kbd>.</li>
+            <li>מוסיפים: <kbd>USERNAME.github.io</kbd> (רק זה, בלי https ובלי הנתיב) ← <kbd>Add</kbd>.</li>
+          </ol>
+          <div class="note"><b>למה:</b> בלי זה, כפתור ההתחברות של Google בדשבורד ייתן שגיאת "unauthorized domain".</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- ═══════════ שלב D ═══════════ -->
+  <section class="phase">
+    <div class="phase__head">
+      <span class="phase__letter">D</span><span class="phase__name">בדיקה</span>
+      <span class="phase__time">~5 דקות</span>
+    </div>
+    <ol class="steps">
+
+      <li class="step" data-k="d1">
+        <button class="badge" type="button" aria-label="סמן שלב 12">12</button>
+        <div class="step__body">
+          <h3>בדיקת הדשבורד</h3>
+          <ol>
+            <li>פותחים <kbd>https://USERNAME.github.io/wedding-rsvp/admin.html</kbd>.</li>
+            <li>לוחצים "התחברות עם Google" ומתחברים עם <strong>arielkahalani1@gmail.com</strong>.</li>
+          </ol>
+          <div class="check"><b>✓ אמור לקרות:</b> נכנסים לדשבורד עם כותרת "אישורי הגעה · אריאל &amp; מירב", כרטיסי מספרים ריקים, ואזור גרירת אקסל.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="d2">
+        <button class="badge" type="button" aria-label="סמן שלב 13">13</button>
+        <div class="step__body">
+          <h3>ייבוא רשימת אורחים</h3>
+          <ol>
+            <li>מכינים קובץ אקסל: <strong>עמודה A = שם</strong>, <strong>עמודה B = טלפון</strong>. שורת כותרת זה בסדר.</li>
+            <li>גוררים אותו לאזור הגרירה בדשבורד.</li>
+            <li>מופיעה הודעה ירוקה "נוספו N אורחים".</li>
+          </ol>
+          <div class="note"><b>טלפון:</b> כל פורמט עובד — <kbd>050-1234567</kbd> · <kbd>0501234567</kbd> · <kbd>+972...</kbd>. אורח שכבר קיים (אותו טלפון) לא ישוכפל בייבוא חוזר.</div>
+        </div>
+      </li>
+
+      <li class="step" data-k="d3">
+        <button class="badge" type="button" aria-label="סמן שלב 14">14</button>
+        <div class="step__body">
+          <h3>בדיקת מקצה לקצה</h3>
+          <ol>
+            <li>בטבלה, לוחצים "שלח" על אורח אחד (שלך) ← נפתח וואטסאפ עם ההודעה ← שולחים לעצמך.</li>
+            <li>פותחים את הקישור מההודעה בטלפון ← אמור להיפתח דף האורח עם השם.</li>
+            <li>לוחצים "מגיע", בוחרים כמות, מאשרים.</li>
+            <li>חוזרים לדשבורד במחשב — המספרים והגרפים מתעדכנים <strong>מיד</strong>.</li>
+          </ol>
+          <div class="check"><b>✓ אם זה עבד — סיימת.</b> המערכת חיה. אפשר לשלוח לכולם.</div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="trouble">
+    <h2>פתרון תקלות</h2>
+
+    <details>
+      <summary>הדשבורד תקוע על "טוען נתונים…" או הודעת "שגיאת הרשאות"</summary>
+      <p>כללי האבטחה לא פורסמו. חוזרים לשלב 5 — Firestore Database ← Rules ← מדביקים שוב ← Publish.</p>
+    </details>
+
+    <details>
+      <summary>כפתור ההתחברות נותן "auth/unauthorized-domain"</summary>
+      <p>לא הוספת את הדומיין ב-Firebase. שלב 11 — Authentication ← Settings ← Authorized domains ← מוסיפים <kbd>USERNAME.github.io</kbd>.</p>
+    </details>
+
+    <details>
+      <summary>נכנסת עם Google אבל זורק אותי החוצה מיד</summary>
+      <p>נכנסת עם חשבון אחר מזה שמוגדר ב-<kbd>adminEmail</kbd>. צריך להתחבר דווקא עם <kbd>arielkahalani1@gmail.com</kbd>, או לשנות את <kbd>adminEmail</kbd> ב-config.js ולהעלות מחדש.</p>
+    </details>
+
+    <details>
+      <summary>האתר מראה דף ריק / שגיאה בקונסול על config</summary>
+      <p>טעות תחביר ב-<kbd>config.js</kbd> — בדרך כלל גרש חסר או פסיק חסר. משווים בקפידה לדוגמה בשלב 6. כל ערך ב-<kbd>'...'</kbd>, פסיק בסוף כל שורה בתוך הסוגריים.</p>
+    </details>
+
+    <details>
+      <summary>הקישור בוואטסאפ לא מראה את התמונה של ההזמנה</summary>
+      <p>שורות ה-<kbd>og:</kbd> ב-<kbd>guest.html</kbd> עדיין מכילות <kbd>REPLACE-WITH-YOUR-SITE</kbd> (שלב 7), או שוואטסאפ שמר בזיכרון גרסה ישנה — לשליחת בדיקה חדשה זה מתעדכן. ודאי גם ש-<kbd>assets/invitation.jpg</kbd> עלה ל-GitHub.</p>
+    </details>
+
+    <details>
+      <summary>"שלח לכולם" לא פותח כלום</summary>
+      <p>הדפדפן חוסם ריבוי חלונות. מאשרים "אפשר חלונות קופצים" לאתר, או משתמשים בכפתור "שלח" הבודד בכל שורה.</p>
+    </details>
+
+    <details>
+      <summary>הגרפים לא זזים אחרי שאורח עונה</summary>
+      <p>הדשבורד מתעדכן בזמן אמת אוטומטית. אם לא — מרעננים את הדף פעם אחת. אם עדיין לא, בודקים שהאורח באמת נשמר (טאב Data ב-Firestore — הרשומה שלו אמורה להראות <kbd>status: yes</kbd>).</p>
+    </details>
+  </section>
+
+  <footer>
+    נתקעת באיזה שלב? חזרי אליי עם צילום מסך של המסך שנתקעת בו — נפתור יחד.
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var KEY = 'weddingSetup.v1';
+    var saved = {};
+    try{ saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){}
+
+    var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+    var bar = document.getElementById('pbar');
+
+    function persist(){
+      try{ localStorage.setItem(KEY, JSON.stringify(saved)); }catch(e){}
+    }
+    function refresh(){
+      var done = 0;
+      steps.forEach(function(s){
+        var on = !!saved[s.dataset.k];
+        s.dataset.done = on ? '1' : '';
+        var b = s.querySelector('.badge');
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.textContent = on ? '✓' : b.getAttribute('data-n');
+        if(on) done++;
+      });
+      bar.style.width = (steps.length ? (done/steps.length*100) : 0) + '%';
+    }
+
+    steps.forEach(function(s, i){
+      var b = s.querySelector('.badge');
+      b.setAttribute('data-n', String(i+1));
+      b.addEventListener('click', function(){
+        saved[s.dataset.k] = !saved[s.dataset.k];
+        if(!saved[s.dataset.k]) delete saved[s.dataset.k];
+        persist(); refresh();
+      });
+    });
+    refresh();
+
+    document.querySelectorAll('.code__copy').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var code = btn.parentElement.querySelector('code');
+        var text = code.innerText;
+        navigator.clipboard.writeText(text).then(function(){
+          var old = btn.textContent;
+          btn.textContent = 'הועתק ✓'; btn.classList.add('done');
+          setTimeout(function(){ btn.textContent = old; btn.classList.remove('done'); }, 1600);
+        });
+      });
+    });
+  })();
+</script>

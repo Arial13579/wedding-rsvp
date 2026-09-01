@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════════
+//  כללי אבטחה ל-Firestore
+//  מדביקים את התוכן הזה ב: Firebase Console ▸ Firestore Database ▸ Rules
+//  ואז לוחצים Publish.
+// ═══════════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---- אורחים ----
+    match /guests/{id} {
+
+      // אורח בודד יכול לקרוא את הרשומה שלו לפי המזהה שקיבל בקישור.
+      allow get: if true;
+
+      // רק מנהל מחובר יכול לראות את *כל* רשימת האורחים / להוסיף / למחוק.
+      allow list, create, delete: if request.auth != null;
+
+      // עדכון:
+      //   • מנהל מחובר — הכל.
+      //   • אורח לא מחובר — רק שדות התשובה, בלי לגעת בשם/טלפון.
+      allow update: if request.auth != null
+        || (
+             request.resource.data.name  == resource.data.name &&
+             request.resource.data.phone == resource.data.phone &&
+             request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['status', 'adults', 'children', 'total', 'updatedAt', 'remindOn'])
+           );
+    }
+
+    // ---- מטא (הגדרות אירוע אופציונליות) ----
+    match /meta/{doc} {
+      allow read:  if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
