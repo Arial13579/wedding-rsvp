@@ -104,6 +104,9 @@
       background:rgba(255,255,255,.05); border:1px solid var(--edge); border-radius:11px; padding:10px 13px;}
     .tools input::placeholder{color:var(--text-3);}
     .tools input:focus{outline:1px solid var(--gold); border-color:var(--gold);}
+    .tools select{font-family:var(--sans); font-size:13.5px; color:var(--text);
+      background:rgba(255,255,255,.05); border:1px solid var(--edge); border-radius:11px; padding:10px 13px;}
+    .tools select:focus{outline:1px solid var(--gold); border-color:var(--gold);}
     .sbtn{font-family:var(--sans); font-weight:500; font-size:12.5px; letter-spacing:.3px; color:#fff; cursor:pointer;
       border:1px solid var(--edge-bright); border-radius:11px; padding:9px 14px; transition:transform .15s, filter .15s;
       -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);}
@@ -112,6 +115,7 @@
     .sbtn.all{background:linear-gradient(135deg,rgba(43,196,178,.95),rgba(15,110,98,.92));}
     .sbtn.sel{background:var(--panel-2);}
     .sbtn.maybe{background:linear-gradient(135deg,rgba(43,196,178,.95),rgba(15,110,98,.92));}
+    .sbtn.thanks{background:linear-gradient(135deg,rgba(231,178,75,.92),rgba(179,131,28,.88));}
     .selc{font-size:11.5px; color:var(--text-3);}
     .tbl-scroll{overflow-x:auto; margin:0 -16px; padding:0 16px;}
     table{width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap;}
@@ -185,9 +189,17 @@
       <div class="glass table-card">
         <div class="tools">
           <input type="search" id="search" placeholder="חיפוש לפי שם / טלפון">
+          <select id="statusFilter">
+            <option value="">כל הסטטוסים</option>
+            <option value="yes">מגיע</option>
+            <option value="no">לא מגיע</option>
+            <option value="maybe">אולי</option>
+            <option value="pending">ממתין</option>
+          </select>
           <button class="sbtn all"   id="sendAll">שלח לכולם</button>
           <button class="sbtn sel"   id="sendSel">שלח לנבחרים</button>
           <button class="sbtn maybe" id="sendMaybe">שלח ל"אולי"</button>
+          <button class="sbtn thanks" id="sendThanks">שלח תודה למי שאישר</button>
           <span class="selc" id="selCount"></span>
         </div>
         <div class="tbl-scroll">
@@ -405,7 +417,9 @@
     }
 
     const $search = document.getElementById('search');
+    const $statusFilter = document.getElementById('statusFilter');
     $search.addEventListener('input', renderTable);
+    $statusFilter.addEventListener('change', renderTable);
     document.getElementById('selAll').addEventListener('click', e=>{
       document.querySelectorAll('.rc').forEach(c=> c.checked = e.target.checked);
       updateSel();
@@ -413,7 +427,12 @@
 
     function renderTable(){
       const q = ($search.value||'').trim();
-      const rows = GUESTS.filter(g => !q || (g.name&&g.name.includes(q)) || (g.phone&&String(g.phone).includes(q)));
+      const sf = $statusFilter.value;
+      const rows = GUESTS.filter(g => {
+        const matchQ = !q || (g.name&&g.name.includes(q)) || (g.phone&&String(g.phone).includes(q));
+        const matchS = !sf || (g.status||'pending') === sf;
+        return matchQ && matchS;
+      });
       const tb = document.getElementById('tbody');
       if (!rows.length){ tb.innerHTML = '<tr><td colspan="10" class="loading">אין אורחים — ייבאו קובץ אקסל למעלה</td></tr>'; updateSel(); return; }
       tb.innerHTML = rows.map(g=>{
@@ -462,6 +481,20 @@
              'להזמנה, לאישור הגעה ולניווט למקום:\n' + link;
     }
     function waLink(g){ return 'https://wa.me/' + toIntl(g.phone) + '?text=' + encodeURIComponent(inviteText(g)); }
+
+    function thankYouText(g){
+      return 'תודה רבה ' + (g.name||'') + ' שהגעתם לחגוג איתנו את החתונה של ' + (cfg.couple||'') + ',\n' +
+             'היה לנו כל כך משמעותי שהייתם שם איתנו.';
+    }
+    function thankYouLink(g){ return 'https://wa.me/' + toIntl(g.phone) + '?text=' + encodeURIComponent(thankYouText(g)); }
+
+    async function sendThanksBatch(list){
+      list = list.filter(g => g.phone);
+      if (!list.length) return alert('אין אורחים שאישרו הגעה עם מספר טלפון.');
+      if (!confirm('ייפתחו ' + list.length + ' חלונות WhatsApp עם הודעת תודה — צריך ללחוץ "שלח" בכל אחד. להמשיך?')) return;
+      list.forEach((g,i)=> setTimeout(()=> window.open(thankYouLink(g), '_blank'), i*900));
+    }
+    document.getElementById('sendThanks').addEventListener('click', ()=> sendThanksBatch(GUESTS.filter(g=>g.status==='yes')));
 
     async function sendBatch(list){
       list = list.filter(g => g.phone);
