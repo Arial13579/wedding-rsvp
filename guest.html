@@ -74,6 +74,10 @@
 
     /* ─── HERO ─── */
     .hero{display:flex; flex-direction:column; align-items:center;}
+    .greet{
+      font-family:var(--sans); font-weight:400; font-size:clamp(12.5px, 3.3vw, 14px);
+      color:var(--text-2); text-align:center; margin-bottom:10px; letter-spacing:.2px;
+    }
     .kicker{
       font-family:var(--sans); text-transform:uppercase; letter-spacing:5px;
       font-size:clamp(9px, 2.6vw, 10.5px); font-weight:400; color:var(--teal); margin-bottom:16px;
@@ -179,6 +183,12 @@
       --glow:rgba(255,255,255,.16); --aura:rgba(255,255,255,.22);}
     .choice.no   {background:linear-gradient(135deg, var(--no), var(--no-d)); border-color:rgba(255,255,255,.13);
       --glow:rgba(220,38,38,.6); --aura:rgba(239,68,68,.5);}
+    .choice.current{box-shadow:inset 0 0 0 2px rgba(255,255,255,.5);}
+    .choice.current::after{
+      content:"✓"; position:absolute; top:9px; inset-inline-end:12px; width:18px; height:18px;
+      border-radius:50%; background:rgba(255,255,255,.24); display:flex; align-items:center;
+      justify-content:center; font-size:11px; line-height:1; color:#fff;
+    }
 
     /* ─── בורר כמויות ─── */
     .steppers{padding:4px 20px;}
@@ -219,6 +229,14 @@
     .done .badge.soft b{font-family:var(--serif); font-size:24px; font-weight:300; color:var(--text-2);}
     .done h2{font-family:var(--serif); font-weight:400; font-size:clamp(19px, 5.4vw, 22px); margin-bottom:9px;}
     .done p{color:var(--text-2); font-size:14.5px; line-height:1.6;}
+
+    .cal-row{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; justify-content:center;}
+    .cal-btn{display:inline-flex; align-items:center; gap:7px; padding:10px 16px; border-radius:12px;
+      border:1px solid var(--edge-bright); background:rgba(255,255,255,.05); color:var(--text);
+      font-family:var(--sans); font-weight:500; font-size:12.5px; text-decoration:none;
+      transition:transform .15s ease, background .15s ease;}
+    .cal-btn:hover{background:rgba(59,224,203,.13); transform:translateY(-2px);}
+    .cal-btn svg{width:15px; height:15px; stroke:var(--teal); flex:none;}
 
     .foot{text-align:center; color:var(--text-3); font-size:11px; letter-spacing:.4px; margin-top:6px;}
 
@@ -310,6 +328,7 @@
 
       document.getElementById('stage').innerHTML = `
         <div class="hero">
+          ${guest.name ? `<div class="greet">שלום ${esc(guest.name)}, כיף שאתם כאן</div>` : ''}
           <div class="kicker">הזמנה לחתונה</div>
           <div class="frame">
             <img src="${c.invitationImage||''}" alt="${esc(c.couple||'')}"
@@ -343,9 +362,9 @@
         ${already ? `<div class="answered">כבר סימנתם: <span>${LABELS[guest.status]||''}</span> — אפשר לעדכן</div>` : ''}
 
         <div id="choose" class="choices">
-          <button class="choice yes"   data-s="yes">מגיע</button>
-          <button class="choice maybe" data-s="maybe">אולי מגיע</button>
-          <button class="choice no"    data-s="no">לא מגיע</button>
+          <button class="choice yes${guest.status==='yes'?' current':''}"   data-s="yes">מגיע</button>
+          <button class="choice maybe${guest.status==='maybe'?' current':''}" data-s="maybe">אולי מגיע</button>
+          <button class="choice no${guest.status==='no'?' current':''}"    data-s="no">לא מגיע</button>
         </div>
 
         <div id="yesForm" class="choices hidden">
@@ -456,8 +475,64 @@
         <div class="badge ${badge}">${badge==='ok'
           ? '<svg viewBox="0 0 24 24"><path class="checkmark" d="M4 12.5l5 5L20 6.5"/></svg>'
           : '<b>·</b>'}</div>
-        <h2>${title}</h2><p>${text}</p>`;
+        <h2>${title}</h2><p>${text}</p>
+        ${status==='yes' ? calendarButtonsHtml() : ''}`;
       d.classList.remove('hidden');
+    }
+
+    const CAL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
+
+    function calEventTimes(){
+      if (!cfg.dateISO) return null;
+      const start = new Date(cfg.dateISO);
+      if (isNaN(start)) return null;
+      const end = new Date(start.getTime() + (cfg.eventDurationHours || 4) * 3600 * 1000);
+      return { start, end };
+    }
+    function fmtUtc(d){ return d.toISOString().replace(/[-:]|\.\d{3}/g,''); }
+
+    function buildGcalUrl(){
+      const t = calEventTimes();
+      if (!t) return null;
+      const loc = [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', ');
+      return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + '&text=' + encodeURIComponent((cfg.couple||'') + ' — חתונה')
+        + '&dates=' + fmtUtc(t.start) + '/' + fmtUtc(t.end)
+        + '&details=' + encodeURIComponent('מחכים לראותכם!')
+        + '&location=' + encodeURIComponent(loc);
+    }
+    function buildIcsUrl(){
+      const t = calEventTimes();
+      if (!t) return null;
+      const esc2 = s => String(s||'').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');
+      const loc = [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', ');
+      const lines = [
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//' + esc2(cfg.couple||'wedding') + '//he','CALSCALE:GREGORIAN',
+        'BEGIN:VEVENT',
+        'UID:' + (guestId || Math.random().toString(36).slice(2)) + '@wedding-rsvp',
+        'DTSTAMP:' + fmtUtc(new Date()),
+        'DTSTART:' + fmtUtc(t.start),
+        'DTEND:' + fmtUtc(t.end),
+        'SUMMARY:' + esc2((cfg.couple||'') + ' — חתונה'),
+        'LOCATION:' + esc2(loc),
+        'DESCRIPTION:' + esc2('מחכים לראותכם!'),
+        'END:VEVENT','END:VCALENDAR'
+      ].join('\r\n');
+      const blob = new Blob([lines], { type:'text/calendar;charset=utf-8' });
+      return URL.createObjectURL(blob);
+    }
+    function icsFileName(){
+      return (cfg.couple||'invite').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'') + '.ics';
+    }
+    function calendarButtonsHtml(){
+      const gcal = buildGcalUrl();
+      if (!gcal) return '';
+      const ics = buildIcsUrl();
+      return `
+        <div class="cal-row">
+          <a class="cal-btn" href="${gcal}" target="_blank" rel="noopener">${CAL_ICON}Google Calendar</a>
+          ${ics ? `<a class="cal-btn" href="${ics}" download="${icsFileName()}">${CAL_ICON}Apple / Outlook</a>` : ''}
+        </div>`;
     }
 
     function fail(){
