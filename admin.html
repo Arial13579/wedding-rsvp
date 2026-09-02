@@ -23,7 +23,7 @@
       --text-2:rgba(224,240,238,.56);
       --text-3:rgba(224,240,238,.32);
       --gold:#3BE0CB;
-      --green:#2FCB86; --rose:#F2726A; --amber:#E7B24B; --gray:#8C8C97;
+      --green:#16A34A; --rose:#DC2626; --amber:#E7B24B; --gray:#8C8C97;
       --r:18px;
       --serif:'Frank Ruhl Libre',Georgia,serif;
       --sans:'Heebo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -109,9 +109,9 @@
       -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);}
     .sbtn:hover{filter:brightness(1.1);}
     .sbtn:active{transform:scale(.95);}
-    .sbtn.all{background:linear-gradient(135deg,rgba(31,141,89,.95),rgba(12,82,53,.92));}
+    .sbtn.all{background:linear-gradient(135deg,rgba(43,196,178,.95),rgba(15,110,98,.92));}
     .sbtn.sel{background:var(--panel-2);}
-    .sbtn.maybe{background:linear-gradient(105deg,rgba(31,141,89,.9) 0 45%,rgba(179,131,28,.92) 50%,rgba(176,74,66,.9) 55% 100%);}
+    .sbtn.maybe{background:linear-gradient(135deg,rgba(43,196,178,.95),rgba(15,110,98,.92));}
     .selc{font-size:11.5px; color:var(--text-3);}
     .tbl-scroll{overflow-x:auto; margin:0 -16px; padding:0 16px;}
     table{width:100%; border-collapse:collapse; font-size:12.5px; white-space:nowrap;}
@@ -119,13 +119,13 @@
     th{color:var(--text-2); font-weight:400; font-size:10.5px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid var(--edge);}
     tbody tr{border-bottom:1px solid rgba(255,255,255,.05);}
     .pill{padding:3px 10px; border-radius:999px; font-size:10.5px; font-weight:500; display:inline-block; letter-spacing:.3px;}
-    .pill.yes{background:rgba(55,208,138,.15); color:#63e0aa;}
-    .pill.no{background:rgba(242,114,106,.14); color:#f5938c;}
+    .pill.yes{background:rgba(22,163,74,.18); color:#4ade80;}
+    .pill.no{background:rgba(220,38,38,.16); color:#f87171;}
     .pill.maybe{background:rgba(231,178,75,.15); color:var(--amber);}
     .pill.pending{background:rgba(244,242,236,.08); color:var(--text-2);}
     .rowbtn{font-family:var(--sans); font-weight:500; font-size:11.5px; color:#fff; text-decoration:none;
       display:inline-block; padding:6px 12px; border-radius:9px; border:1px solid var(--edge-bright);
-      background:linear-gradient(135deg,rgba(31,141,89,.9),rgba(12,82,53,.85));}
+      background:linear-gradient(135deg,rgba(43,196,178,.9),rgba(15,110,98,.85));}
     .rowbtn.sent{background:rgba(255,255,255,.06);}
     .muted{color:var(--text-3);}
     .loading{text-align:center; padding:34px; color:var(--text-2); font-family:var(--serif); font-weight:300; font-size:15px; letter-spacing:.5px;}
@@ -323,9 +323,9 @@
       id:'dropShadow3d',
       beforeDatasetsDraw(chart){
         chart.ctx.save();
-        chart.ctx.shadowColor = 'rgba(0,0,0,.55)';
-        chart.ctx.shadowBlur = 16;
-        chart.ctx.shadowOffsetY = 9;
+        chart.ctx.shadowColor = 'rgba(0,0,0,.42)';
+        chart.ctx.shadowBlur = 13;
+        chart.ctx.shadowOffsetY = 7;
       },
       afterDatasetsDraw(chart){ chart.ctx.restore(); }
     };
@@ -339,8 +339,8 @@
         const r = Math.min(area.right-area.left, area.bottom-area.top)/2;
         ctx.save();
         const g = ctx.createRadialGradient(cx-r*.35, cy-r*.5, 2, cx-r*.1, cy-r*.15, r*.95);
-        g.addColorStop(0, 'rgba(255,255,255,.24)');
-        g.addColorStop(.4, 'rgba(255,255,255,.05)');
+        g.addColorStop(0, 'rgba(255,255,255,.15)');
+        g.addColorStop(.4, 'rgba(255,255,255,.03)');
         g.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
         ctx.fillStyle = g; ctx.fill();
@@ -362,11 +362,11 @@
           ctx.beginPath();
           ctx.moveTo(right, top); ctx.lineTo(right+DEPTH, top-DEPTH);
           ctx.lineTo(right+DEPTH, bottom-DEPTH); ctx.lineTo(right, bottom);
-          ctx.closePath(); ctx.fillStyle = shade(hex,-.4); ctx.fill();
+          ctx.closePath(); ctx.fillStyle = shade(hex,-.32); ctx.fill();
           ctx.beginPath();
           ctx.moveTo(left, top); ctx.lineTo(left+DEPTH, top-DEPTH);
           ctx.lineTo(right+DEPTH, top-DEPTH); ctx.lineTo(right, top);
-          ctx.closePath(); ctx.fillStyle = shade(hex,.35); ctx.fill();
+          ctx.closePath(); ctx.fillStyle = shade(hex,.25); ctx.fill();
           ctx.restore();
         });
       }
@@ -378,7 +378,7 @@
       Chart.defaults.font.family = "'Heebo', sans-serif";
       Chart.defaults.borderColor = 'rgba(255,255,255,.06)';
 
-      const statusColors = ['#2FCB86','#F2726A','#E7B24B','#8C8C97'];
+      const statusColors = ['#16A34A','#DC2626','#E7B24B','#8C8C97'];
       const sd = { labels:['מגיע','לא מגיע','אולי','ממתין'],
         datasets:[{ data:[s.yes,s.no,s.maybe,s.pending],
           backgroundColor:(ctx)=> glossFill(ctx.chart, statusColors[ctx.dataIndex]),
@@ -390,7 +390,7 @@
         options:{ maintainAspectRatio:false, cutout:'64%',
           plugins:{ legend:{ position:'bottom', labels:{ padding:14, usePointStyle:true, pointStyle:'circle' } } } } });
 
-      const ageColors = ['#3BE0CB','#2FCB86'];
+      const ageColors = ['#3BE0CB','#E7B24B'];
       const ad = { labels:['מבוגרים','ילדים'],
         datasets:[{ data:[s.adults,s.children],
           backgroundColor:(ctx)=> glossFill(ctx.chart, ageColors[ctx.dataIndex]),
