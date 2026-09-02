@@ -33,8 +33,8 @@
       --text-3:rgba(224,240,238,.32);
       --teal:#3BE0CB;
       --teal-line:rgba(59,224,203,.4);
-      --yes:#1D7E52; --yes-d:#0E5738;
-      --no:#983E36;  --no-d:#762B26;
+      --yes:#16A34A; --yes-d:#0D7A37;
+      --no:#DC2626;  --no-d:#A81D1D;
       --r:18px;
       --serif:'Frank Ruhl Libre',Georgia,'Times New Roman',serif;
       --sans:'Heebo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -156,20 +156,29 @@
     /* ─── כפתורי בחירה (סטטיים, מגיבים למעבר עכבר) ─── */
     .choices{display:flex; flex-direction:column; gap:12px; margin-top:4px;}
     .choice{
-      width:100%; border:1px solid var(--edge); border-radius:14px;
+      width:100%; border:1px solid var(--edge); border-radius:14px; position:relative; isolation:isolate;
       padding:clamp(16px, 4.4vw, 19px) 20px;
       font-family:var(--sans); font-weight:500; font-size:clamp(15px, 4vw, 17px); letter-spacing:.5px;
       color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center;
       -webkit-backdrop-filter:blur(16px) saturate(1.15); backdrop-filter:blur(16px) saturate(1.15);
       transition:transform .16s ease, filter .16s ease, box-shadow .16s ease, background .16s ease;
     }
+    .choice::before{
+      content:""; position:absolute; inset:-16px; z-index:-1; border-radius:26px;
+      background:radial-gradient(60% 60% at 50% 50%, var(--aura, transparent), transparent 72%);
+      opacity:0; filter:blur(8px); transition:opacity .28s ease;
+    }
     .choice:hover{transform:translateY(-5px); filter:brightness(1.1);
       box-shadow:0 22px 46px -16px var(--glow, rgba(0,0,0,.5));}
+    .choice:hover::before{opacity:1;}
     .choice:active{transform:translateY(-1px) scale(.995);}
     .choice:focus-visible{outline:2px solid var(--teal); outline-offset:3px;}
-    .choice.yes  {background:linear-gradient(135deg, var(--yes), var(--yes-d)); border-color:rgba(255,255,255,.14); --glow:rgba(42,164,111,.5);}
-    .choice.maybe{background:rgba(255,255,255,.06); border-color:var(--edge-bright); color:var(--text); --glow:rgba(255,255,255,.14);}
-    .choice.no   {background:linear-gradient(135deg, var(--no), var(--no-d)); border-color:rgba(255,255,255,.13); --glow:rgba(191,90,80,.42);}
+    .choice.yes  {background:linear-gradient(135deg, var(--yes), var(--yes-d)); border-color:rgba(255,255,255,.14);
+      --glow:rgba(22,163,74,.65); --aura:rgba(34,197,94,.55);}
+    .choice.maybe{background:rgba(255,255,255,.06); border-color:var(--edge-bright); color:var(--text);
+      --glow:rgba(255,255,255,.16); --aura:rgba(255,255,255,.22);}
+    .choice.no   {background:linear-gradient(135deg, var(--no), var(--no-d)); border-color:rgba(255,255,255,.13);
+      --glow:rgba(220,38,38,.6); --aura:rgba(239,68,68,.5);}
 
     /* ─── בורר כמויות ─── */
     .steppers{padding:4px 20px;}
@@ -436,9 +445,10 @@
       if (status==='yes'){
         badge='ok'; title='נתראה בשמחה';
         text = 'רשמנו ' + adults + ' מבוגרים' + (children ? ' ו-' + children + ' ילדים' : '') + '.';
-        burst();
+        flowerBurst();
       } else if (status==='no'){
         title='חבל שלא תוכלו להגיע'; text='תמיד אפשר לשנות את התשובה דרך הקישור הזה.';
+        petalFall();
       } else {
         title='אין בעיה'; text='נזכיר לכם שוב בעוד כשבוע.';
       }
@@ -459,12 +469,28 @@
       document.getElementById('choose').classList.remove('hidden');
     }
 
-    function burst(){
+    function flowerBurst(){
       if (typeof confetti !== 'function' || reduce) return;
-      const colors = ['#3BE0CB','#F0F4F3','#2AA46F','#7FE9FF'];
-      confetti({ particleCount:70, spread:66, origin:{y:.62}, colors, scalar:.85 });
-      setTimeout(()=>confetti({ particleCount:45, angle:60,  spread:52, origin:{x:0,y:.65}, colors, scalar:.85 }),150);
-      setTimeout(()=>confetti({ particleCount:45, angle:120, spread:52, origin:{x:1,y:.65}, colors, scalar:.85 }),300);
+      let flowers = null;
+      try{
+        flowers = ['🌸','🌺','🌼','💮'].map(e => confetti.shapeFromText({ text:e, scalar:2.4 }));
+      }catch(e){ flowers = null; }
+      const opts = flowers
+        ? { shapes:flowers, scalar:1, gravity:.85, drift:.15, ticks:230 }
+        : { colors:['#3BE0CB','#F0F4F3','#16A34A','#7FE9FF'], scalar:.85 };
+      confetti({ particleCount:26, spread:70, startVelocity:38, origin:{y:.6}, ...opts });
+      setTimeout(()=>confetti({ particleCount:16, angle:60,  spread:55, startVelocity:32, origin:{x:0,y:.65}, ...opts }),150);
+      setTimeout(()=>confetti({ particleCount:16, angle:120, spread:55, startVelocity:32, origin:{x:1,y:.65}, ...opts }),300);
+    }
+
+    function petalFall(){
+      if (typeof confetti !== 'function' || reduce) return;
+      let petal = null;
+      try{ petal = confetti.shapeFromText({ text:'🥀', scalar:2 }); }catch(e){ petal = null; }
+      const opts = petal
+        ? { shapes:[petal], scalar:1, gravity:.5, drift:0, ticks:200 }
+        : { colors:['#DC2626','#8C8C97'], scalar:.6 };
+      confetti({ particleCount:14, spread:80, startVelocity:14, origin:{y:.35}, ...opts });
     }
 
     /* dd.mm.yyyy — משמאל לימין */
