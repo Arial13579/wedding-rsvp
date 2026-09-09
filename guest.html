@@ -636,9 +636,6 @@
         'END:VEVENT','END:VCALENDAR'
       ].join('\r\n');
     }
-    function icsFileName(){
-      return (cfg.couple||'invite').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'') + '.ics';
-    }
     function calendarButtonsHtml(){
       if (!calEventTimes()) return '';
       return `
@@ -646,18 +643,28 @@
           <button type="button" class="cal-btn js-cal">${CAL_ICON}הוספה ליומן המכשיר</button>
         </div>`;
     }
+    function isAppleDevice(){
+      const ua = navigator.userAgent || '';
+      return /iPad|iPhone|iPod/.test(ua) || /Macintosh/.test(ua)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
     let _icsUrl = null;
     function addToCalendar(){
       const text = buildIcsText();
       if (!text) return;
+
+      /* אייפון / אייפד / מק — היומן של המכשיר נפתח ישירות (בלי הורדת קובץ) */
+      if (isAppleDevice()){
+        const data = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text);
+        if (!window.open(data, '_blank')) window.location.href = data;
+        return;
+      }
+
+      /* אנדרואיד ומכשירים אחרים — פותח את אירוע היומן, לא הורדה כפויה.
+         בטלפון היומן נפתח; במחשב הדפדפן שומר קובץ קטן שנפתח ביומן בלחיצה. */
       if (_icsUrl) URL.revokeObjectURL(_icsUrl);
       _icsUrl = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' }));
-      const a = document.createElement('a');
-      a.href = _icsUrl;
-      a.download = icsFileName();
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      if (!window.open(_icsUrl, '_blank')) window.location.href = _icsUrl;
       setTimeout(()=>{ if (_icsUrl){ URL.revokeObjectURL(_icsUrl); _icsUrl = null; } }, 20000);
     }
     function wireCalButtons(){
