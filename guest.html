@@ -267,7 +267,55 @@
       .checkmark{animation:none !important; stroke-dashoffset:0;}
       .frame::before{animation:none !important;}
     }
+
+    /* ═══ תפריט נגישות (אתר האורחים בלבד) ═══ */
+    .a11y{position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); z-index:90;}
+    .a11y-fab{position:relative; z-index:2; width:52px; height:52px; border-radius:50%; cursor:pointer;
+      border:1px solid rgba(59,224,203,.5); background:rgba(10,12,13,.74); color:var(--teal);
+      -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4);
+      box-shadow:0 14px 32px -12px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.14);
+      display:grid; place-items:center;
+      transition:transform .38s cubic-bezier(.2,.9,.3,1.3), background .2s;}
+    .a11y-fab svg{width:26px; height:26px;}
+    .a11y-fab:hover{background:rgba(59,224,203,.16);}
+    .a11y-fab:active{transform:scale(.92);}
+    .a11y.open .a11y-fab{transform:rotate(135deg);}
+    .a11y-opts{position:absolute; left:3px; bottom:3px; width:46px; height:46px; z-index:1;}
+    .a11y-opt{position:absolute; inset:0; border-radius:50%; cursor:pointer;
+      border:1px solid var(--edge-bright); background:rgba(17,19,21,.92); color:var(--text);
+      -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+      box-shadow:0 10px 24px -10px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.1);
+      display:grid; place-items:center; opacity:0; pointer-events:none;
+      transform:translate(0,0) rotate(-140deg) scale(.2);
+      transition:transform .42s cubic-bezier(.2,.9,.3,1.45), opacity .25s ease, background .2s, border-color .2s;}
+    .a11y-opt svg{width:22px; height:22px;}
+    .a11y-opt[aria-pressed="true"]{border-color:var(--teal); color:var(--teal); background:rgba(59,224,203,.18);}
+    .a11y.open .a11y-opt{opacity:1; pointer-events:auto;}
+    .a11y.open .a11y-opt[data-i="0"]{transform:translate(2px,-93px) rotate(0) scale(1); transition-delay:.02s;}
+    .a11y.open .a11y-opt[data-i="1"]{transform:translate(64px,-67px) rotate(0) scale(1); transition-delay:.07s;}
+    .a11y.open .a11y-opt[data-i="2"]{transform:translate(92px,-5px) rotate(0) scale(1); transition-delay:.12s;}
+    .a11y-fab:focus-visible,.a11y-opt:focus-visible{outline:2px solid var(--teal); outline-offset:3px;}
+
+    /* מצב ניגודיות גבוהה */
+    html.a11y-contrast{--bg:#000; --text:#fff; --text-2:#fff; --text-3:#efefef;
+      --edge:rgba(255,255,255,.55); --edge-bright:rgba(255,255,255,.85);
+      --teal:#63f7e4; --teal-line:rgba(120,255,244,.85);}
+    html.a11y-contrast body{background:#000;}
+    html.a11y-contrast .bg,html.a11y-contrast .grain{display:none !important;}
+    html.a11y-contrast .glass{background:#000 !important; border-color:#fff;}
+    html.a11y-contrast .frame{background:#000; border-color:#fff;}
+    html.a11y-contrast .frame::before{display:none !important;}
+    html.a11y-contrast .choice{border-color:#fff;}
+    html.a11y-contrast .choice.maybe{background:#000;}
+    html.a11y-contrast a{text-decoration:underline;}
+    html.a11y-contrast .a11y-fab{background:#000; border-color:#fff; color:#fff;}
+    html.a11y-contrast .a11y-opt{background:#000;}
+
+    /* עצירת אנימציות והבהובים */
+    html.a11y-still *,html.a11y-still *::before,html.a11y-still *::after{
+      animation:none !important; transition-duration:.001s !important; scroll-behavior:auto !important;}
   </style>
+  <script>try{var p=JSON.parse(localStorage.getItem('a11yPrefs')||'{}'),r=document.documentElement;if(p.contrast)r.classList.add('a11y-contrast');if(p.still)r.classList.add('a11y-still');}catch(e){}</script>
 </head>
 <body>
   <div class="bg"></div>
@@ -276,6 +324,72 @@
   <main class="stage" id="stage">
     <div class="loading">רגע…</div>
   </main>
+
+  <!-- ═══ תפריט נגישות (אתר האורחים בלבד) ═══ -->
+  <div class="a11y" id="a11y">
+    <div class="a11y-opts">
+      <button class="a11y-opt" data-i="0" data-act="contrast" type="button" aria-pressed="false" aria-label="מצב ניגודיות גבוהה">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3a9 9 0 010 18z" fill="currentColor"/></svg>
+      </button>
+      <button class="a11y-opt" data-i="1" data-act="font" type="button" aria-pressed="false" aria-label="הגדלת גודל הטקסט">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17 8 5l5 12M4.7 13h6.6"/><path d="M14 17l3.5-8 3.5 8M15.2 14.3h4.6"/></svg>
+      </button>
+      <button class="a11y-opt" data-i="2" data-act="still" type="button" aria-pressed="false" aria-label="עצירת אנימציות והבהובים">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="5" width="3.5" height="14" rx="1"/><rect x="14.5" y="5" width="3.5" height="14" rx="1"/></svg>
+      </button>
+    </div>
+    <button class="a11y-fab" id="a11yFab" type="button" aria-expanded="false" aria-label="פתיחת תפריט נגישות">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="3.6" r="2.1" fill="currentColor"/><path d="M4.5 8s4 1 7.5 1 7.5-1 7.5-1M12 9.2V14M8.5 20.5 12 13l3.5 7.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+  <script>
+  (function(){
+    var root = document.documentElement;
+    var wrap = document.getElementById('a11y');
+    var fab  = document.getElementById('a11yFab');
+    var STEPS = [1, 1.15, 1.3, 1.45];
+    var prefs;
+    try{ prefs = JSON.parse(localStorage.getItem('a11yPrefs') || '{}'); }catch(e){ prefs = {}; }
+    if (typeof prefs.font !== 'number') prefs.font = 0;
+
+    function save(){ try{ localStorage.setItem('a11yPrefs', JSON.stringify(prefs)); }catch(e){} }
+    function pressed(act, on){
+      var b = wrap.querySelector('[data-act="'+act+'"]');
+      if (b) b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    function applyFont(){
+      var st = document.getElementById('stage');
+      if (st) st.style.zoom = STEPS[prefs.font] || 1;
+      try{ document.body.style.overflowX = prefs.font > 0 ? 'auto' : 'hidden'; }catch(e){}
+      pressed('font', prefs.font > 0);
+    }
+    function applyAll(){
+      root.classList.toggle('a11y-contrast', !!prefs.contrast);
+      root.classList.toggle('a11y-still', !!prefs.still);
+      pressed('contrast', !!prefs.contrast);
+      pressed('still', !!prefs.still);
+      applyFont();
+    }
+    function setOpen(o){
+      wrap.classList.toggle('open', o);
+      fab.setAttribute('aria-expanded', o ? 'true' : 'false');
+    }
+    fab.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!wrap.classList.contains('open')); });
+    document.addEventListener('click', function(e){ if (!wrap.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setOpen(false); });
+    wrap.querySelectorAll('.a11y-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var a = btn.dataset.act;
+        if (a === 'contrast') prefs.contrast = !prefs.contrast;
+        else if (a === 'still') prefs.still = !prefs.still;
+        else if (a === 'font')  prefs.font = (prefs.font + 1) % STEPS.length;
+        save(); applyAll();
+      });
+    });
+    window.addEventListener('load', applyFont);
+    applyAll();
+  })();
+  </script>
 
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -361,6 +475,7 @@
         </a>
 
         ${already ? `<div class="answered">כבר סימנתם: <span>${LABELS[guest.status]||''}</span> — אפשר לעדכן</div>` : ''}
+        ${already && guest.status==='yes' ? calendarButtonsHtml() : ''}
 
         <div id="choose" class="choices">
           <button class="choice yes${guest.status==='yes'?' current':''}"   data-s="yes">מגיע</button>
@@ -393,6 +508,7 @@
 
       startCountdown();
       wireEvents(counts);
+      wireCalButtons();
     }
 
     function startCountdown(){
@@ -479,8 +595,7 @@
         <h2>${title}</h2><p>${text}</p>
         ${status==='yes' ? calendarButtonsHtml() : ''}`;
       d.classList.remove('hidden');
-      const calBtn = document.getElementById('calBtn');
-      if (calBtn) calBtn.addEventListener('click', addToCalendar);
+      wireCalButtons();
     }
 
     const CAL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
@@ -494,60 +609,61 @@
     }
     function fmtUtc(d){ return d.toISOString().replace(/[-:]|\.\d{3}/g,''); }
 
-    function buildGcalUrl(){
+    /* קובץ .ics תקני — יומן המכשיר בלבד (Apple / Android / Outlook), לא Google.
+       כל מכשיר פותח אותו ביומן המובנה שלו עם כל הפרטים ממולאים,
+       והאורח רק צריך לאשר "הוספה". */
+    function buildIcsText(){
       const t = calEventTimes();
       if (!t) return null;
-      const loc = [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', ');
-      return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-        + '&text=' + encodeURIComponent('חתונה של ' + (cfg.couple||''))
-        + '&dates=' + fmtUtc(t.start) + '/' + fmtUtc(t.end)
-        + '&details=' + encodeURIComponent('מחכים לראותכם!')
-        + '&location=' + encodeURIComponent(loc);
-    }
-    function buildIcsUrl(){
-      const t = calEventTimes();
-      if (!t) return null;
-      const esc2 = s => String(s||'').replace(/([,;])/g,'\\$1').replace(/\n/g,'\\n');
-      const loc = [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', ');
-      const lines = [
-        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//' + esc2(cfg.couple||'wedding') + '//he','CALSCALE:GREGORIAN',
+      const esc2  = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
+      const loc   = [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', ');
+      const waze  = cfg.wazeQuery || cfg.venueAddress || '';
+      const title = 'חתונה של ' + (cfg.couple || '');
+      const desc  = 'מחכים לראותכם לחגוג!' +
+        (waze ? '\nניווט: https://waze.com/ul?q=' + encodeURIComponent(waze) + '&navigate=yes' : '');
+      return [
+        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//wedding-rsvp//he','CALSCALE:GREGORIAN','METHOD:PUBLISH',
         'BEGIN:VEVENT',
         'UID:' + (guestId || Math.random().toString(36).slice(2)) + '@wedding-rsvp',
         'DTSTAMP:' + fmtUtc(new Date()),
         'DTSTART:' + fmtUtc(t.start),
-        'DTEND:' + fmtUtc(t.end),
-        'SUMMARY:' + esc2('חתונה של ' + (cfg.couple||'')),
-        'LOCATION:' + esc2(loc),
-        'DESCRIPTION:' + esc2('מחכים לראותכם!'),
+        'DTEND:'   + fmtUtc(t.end),
+        'SUMMARY:'     + esc2(title),
+        'LOCATION:'    + esc2(loc),
+        'DESCRIPTION:' + esc2(desc),
+        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(title),'TRIGGER:-P1D','END:VALARM',
+        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(title),'TRIGGER:-PT3H','END:VALARM',
         'END:VEVENT','END:VCALENDAR'
       ].join('\r\n');
-      const blob = new Blob([lines], { type:'text/calendar;charset=utf-8' });
-      return URL.createObjectURL(blob);
     }
     function icsFileName(){
       return (cfg.couple||'invite').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-+|-+$/g,'') + '.ics';
-    }
-    function isAppleDevice(){
-      return /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
     }
     function calendarButtonsHtml(){
       if (!calEventTimes()) return '';
       return `
         <div class="cal-row">
-          <button type="button" class="cal-btn" id="calBtn">${CAL_ICON}הוספה ליומן</button>
+          <button type="button" class="cal-btn js-cal">${CAL_ICON}הוספה ליומן המכשיר</button>
         </div>`;
     }
+    let _icsUrl = null;
     function addToCalendar(){
-      if (isAppleDevice()){
-        const ics = buildIcsUrl();
-        if (!ics) return;
-        const a = document.createElement('a');
-        a.href = ics; a.download = icsFileName();
-        document.body.appendChild(a); a.click(); a.remove();
-      } else {
-        const gcal = buildGcalUrl();
-        if (gcal) window.open(gcal, '_blank');
-      }
+      const text = buildIcsText();
+      if (!text) return;
+      if (_icsUrl) URL.revokeObjectURL(_icsUrl);
+      _icsUrl = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = _icsUrl;
+      a.download = icsFileName();
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>{ if (_icsUrl){ URL.revokeObjectURL(_icsUrl); _icsUrl = null; } }, 20000);
+    }
+    function wireCalButtons(){
+      document.querySelectorAll('.js-cal').forEach(b=>{
+        if (!b._wired){ b._wired = true; b.addEventListener('click', addToCalendar); }
+      });
     }
 
     function fail(){
@@ -560,7 +676,7 @@
     }
 
     function flowerBurst(){
-      if (typeof confetti !== 'function' || reduce) return;
+      if (typeof confetti !== 'function' || reduce || document.documentElement.classList.contains('a11y-still')) return;
       let flowers = null;
       try{
         flowers = ['💮','💮','🌼','💮'].map(e => confetti.shapeFromText({ text:e, scalar:3.6 }));
@@ -574,7 +690,7 @@
     }
 
     function petalFall(){
-      if (typeof confetti !== 'function' || reduce) return;
+      if (typeof confetti !== 'function' || reduce || document.documentElement.classList.contains('a11y-still')) return;
       let petal = null;
       try{ petal = confetti.shapeFromText({ text:'🥀', scalar:2 }); }catch(e){ petal = null; }
       const opts = petal
