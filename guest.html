@@ -474,8 +474,8 @@
           <div class="loc-cta">ניווט Waze ›</div>
         </a>
 
-        ${already ? `<div class="answered">כבר סימנתם: <span>${LABELS[guest.status]||''}</span> — אפשר לעדכן</div>` : ''}
-        ${already && guest.status==='yes' ? calendarButtonsHtml() : ''}
+        ${already ? `<div id="answeredBanner" class="answered">כבר סימנתם: <span>${LABELS[guest.status]||''}</span> — אפשר לעדכן</div>` : ''}
+        ${already && guest.status==='yes' ? `<div id="calTop">${calendarButtonsHtml()}</div>` : ''}
 
         <div id="choose" class="choices">
           <button class="choice yes${guest.status==='yes'?' current':''}"   data-s="yes">מגיע</button>
@@ -576,6 +576,11 @@
 
     function finish(status, adults, children){
       document.getElementById('loading').classList.add('hidden');
+      /* מסירים את כפתור היומן והבאנר שהוצגו במצב "כבר סימנתם" —
+         כדי שיישאר רק כפתור יומן אחד, זה שבמסך הסיום. */
+      ['calTop','answeredBanner'].forEach(id=>{
+        const el = document.getElementById(id); if (el) el.remove();
+      });
       const d = document.getElementById('done');
       let badge='soft', title='', text='';
       if (status==='yes'){
