@@ -609,18 +609,20 @@
     }
     function fmtUtc(d){ return d.toISOString().replace(/[-:]|\.\d{3}/g,''); }
 
-    /* קובץ .ics תקני — יומן המכשיר בלבד (Apple / Android / Outlook), לא Google.
-       כל מכשיר פותח אותו ביומן המובנה שלו עם כל הפרטים ממולאים,
-       והאורח רק צריך לאשר "הוספה". */
+    function calTitle(){ return 'החתונה של ' + (cfg.couple || ''); }
+    function calLocation(){ return [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', '); }
+    function calDetails(){
+      const waze = cfg.wazeQuery || cfg.venueAddress || '';
+      return 'מחכים לראותכם לחגוג!' +
+        (waze ? '\nניווט ב-Waze: https://waze.com/ul?q=' + encodeURIComponent(waze) + '&navigate=yes' : '');
+    }
+
+    /* קובץ אירוע תקני (VEVENT) — לאייפון / אייפד / מק / Outlook.
+       המכשיר פותח אותו ביומן המובנה עם כל הפרטים ממולאים, והאורח מאשר "הוספה". */
     function buildIcsText(){
       const t = calEventTimes();
       if (!t) return null;
-      const esc2  = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
-      const loc   = [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', ');
-      const waze  = cfg.wazeQuery || cfg.venueAddress || '';
-      const title = 'חתונה של ' + (cfg.couple || '');
-      const desc  = 'מחכים לראותכם לחגוג!' +
-        (waze ? '\nניווט: https://waze.com/ul?q=' + encodeURIComponent(waze) + '&navigate=yes' : '');
+      const esc2 = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
       return [
         'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//wedding-rsvp//he','CALSCALE:GREGORIAN','METHOD:PUBLISH',
         'BEGIN:VEVENT',
@@ -628,19 +630,35 @@
         'DTSTAMP:' + fmtUtc(new Date()),
         'DTSTART:' + fmtUtc(t.start),
         'DTEND:'   + fmtUtc(t.end),
-        'SUMMARY:'     + esc2(title),
-        'LOCATION:'    + esc2(loc),
-        'DESCRIPTION:' + esc2(desc),
-        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(title),'TRIGGER:-P1D','END:VALARM',
-        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(title),'TRIGGER:-PT3H','END:VALARM',
+        'SUMMARY:'     + esc2(calTitle()),
+        'LOCATION:'    + esc2(calLocation()),
+        'DESCRIPTION:' + esc2(calDetails()),
+        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(calTitle()),'TRIGGER:-P1D','END:VALARM',
+        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(calTitle()),'TRIGGER:-PT3H','END:VALARM',
         'END:VEVENT','END:VCALENDAR'
       ].join('\r\n');
     }
+
+    /* קישור ליומן Google — נפתח כמסך "אירוע חדש" מוכן בתאריך האירוע.
+       באנדרואיד זה פותח את אפליקציית היומן; במחשב זה נפתח בלשונית חדשה. */
+    function buildGoogleUrl(){
+      const t = calEventTimes();
+      if (!t) return null;
+      const p = new URLSearchParams({
+        action: 'TEMPLATE',
+        text:   calTitle(),
+        dates:  fmtUtc(t.start) + '/' + fmtUtc(t.end),
+        details: calDetails(),
+        location: calLocation()
+      });
+      return 'https://calendar.google.com/calendar/render?' + p.toString();
+    }
+
     function calendarButtonsHtml(){
       if (!calEventTimes()) return '';
       return `
         <div class="cal-row">
-          <button type="button" class="cal-btn js-cal">${CAL_ICON}הוספה ליומן המכשיר</button>
+          <button type="button" class="cal-btn js-cal">${CAL_ICON}הוספת התאריך ליומן</button>
         </div>`;
     }
     function isAppleDevice(){
@@ -648,24 +666,39 @@
       return /iPad|iPhone|iPod/.test(ua) || /Macintosh/.test(ua)
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
-    let _icsUrl = null;
-    function addToCalendar(){
-      const text = buildIcsText();
-      if (!text) return;
+    function isAndroid(){ return /Android/i.test(navigator.userAgent || ''); }
 
-      /* אייפון / אייפד / מק — היומן של המכשיר נפתח ישירות (בלי הורדת קובץ) */
-      if (isAppleDevice()){
-        const data = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text);
-        if (!window.open(data, '_blank')) window.location.href = data;
+    function addToCalendar(){
+      const t = calEventTimes();
+      if (!t) return;
+
+      /* אנדרואיד — פותחים ישירות את יומן המכשיר (Google Calendar) עם האירוע מוכן.
+         אין הורדת קובץ ואין דף ריק — רק מסך "אירוע חדש" שממתין לאישור. */
+      if (isAndroid() && !isAppleDevice()){
+        const g = buildGoogleUrl();
+        if (g && !window.open(g, '_blank', 'noopener')) window.location.href = g;
         return;
       }
 
-      /* אנדרואיד ומכשירים אחרים — פותח את אירוע היומן, לא הורדה כפויה.
-         בטלפון היומן נפתח; במחשב הדפדפן שומר קובץ קטן שנפתח ביומן בלחיצה. */
-      if (_icsUrl) URL.revokeObjectURL(_icsUrl);
-      _icsUrl = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' }));
-      if (!window.open(_icsUrl, '_blank')) window.location.href = _icsUrl;
-      setTimeout(()=>{ if (_icsUrl){ URL.revokeObjectURL(_icsUrl); _icsUrl = null; } }, 20000);
+      /* אייפון / אייפד / מק — יומן המכשיר (Apple Calendar) נפתח דרך קובץ אירוע.
+         Blob במקום data: כי Safari חוסם ניווט ל-data:. iOS פותח את מסך
+         "הוספה ליומן" ולא מוריד קובץ (אין מאפיין download על הקישור). */
+      if (isAppleDevice()){
+        const url = URL.createObjectURL(
+          new Blob([buildIcsText()], { type:'text/calendar;charset=utf-8' })
+        );
+        const a = document.createElement('a');
+        a.href = url; a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
+        return;
+      }
+
+      /* מחשב (Windows / Linux) — יומן Google בלשונית חדשה, מוכן לשמירה. */
+      const g = buildGoogleUrl();
+      if (g && !window.open(g, '_blank', 'noopener')) window.location.href = g;
     }
     function wireCalButtons(){
       document.querySelectorAll('.js-cal').forEach(b=>{
