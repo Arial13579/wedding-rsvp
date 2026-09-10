@@ -661,10 +661,13 @@
           <button type="button" class="cal-btn js-cal">${CAL_ICON}הוספת התאריך ליומן</button>
         </div>`;
     }
-    function isAppleDevice(){
+    /* אייפון / אייפד בלבד (כולל iPadOS שמתחזה ל-Mac) — לא כולל מק שולחני */
+    function isIOS(){
       const ua = navigator.userAgent || '';
-      return /iPad|iPhone|iPod/.test(ua) || /Macintosh/.test(ua)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (/iPhone|iPod/.test(ua)) return true;
+      if (/iPad/.test(ua)) return true;
+      // iPadOS 13+ מדווח כ-Macintosh אך יש לו מסך מגע
+      return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
     }
     function isAndroid(){ return /Android/i.test(navigator.userAgent || ''); }
 
@@ -672,33 +675,24 @@
       const t = calEventTimes();
       if (!t) return;
 
-      /* אנדרואיד — פותחים ישירות את יומן המכשיר (Google Calendar) עם האירוע מוכן.
-         אין הורדת קובץ ואין דף ריק — רק מסך "אירוע חדש" שממתין לאישור. */
-      if (isAndroid() && !isAppleDevice()){
-        const g = buildGoogleUrl();
-        if (g && !window.open(g, '_blank', 'noopener')) window.location.href = g;
-        return;
-      }
-
-      /* אייפון / אייפד / מק — יומן המכשיר (Apple Calendar) נפתח דרך קובץ אירוע.
-         Blob במקום data: כי Safari חוסם ניווט ל-data:. iOS פותח את מסך
-         "הוספה ליומן" ולא מוריד קובץ (אין מאפיין download על הקישור). */
-      if (isAppleDevice()){
+      /* אייפון / אייפד — פותחים ישירות את יומן המכשיר (Apple Calendar).
+         ניווט ה-URL אל קובץ האירוע פותח את מסך "הוספה ליומן" עם כל הפרטים,
+         בלי להוריד קובץ ובלי דף ריק. */
+      if (isIOS()){
         const url = URL.createObjectURL(
           new Blob([buildIcsText()], { type:'text/calendar;charset=utf-8' })
         );
-        const a = document.createElement('a');
-        a.href = url; a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        window.location.href = url;
         setTimeout(() => URL.revokeObjectURL(url), 15000);
         return;
       }
 
-      /* מחשב (Windows / Linux) — יומן Google בלשונית חדשה, מוכן לשמירה. */
+      /* אנדרואיד — פותח את אפליקציית יומן Google של הטלפון עם האירוע מוכן לאישור.
+         מחשב (Windows / Mac / Linux) — יומן Google בלשונית חדשה, מוכן לשמירה. */
       const g = buildGoogleUrl();
-      if (g && !window.open(g, '_blank', 'noopener')) window.location.href = g;
+      if (!g) return;
+      if (isAndroid()) window.location.href = g;
+      else if (!window.open(g, '_blank', 'noopener')) window.location.href = g;
     }
     function wireCalButtons(){
       document.querySelectorAll('.js-cal').forEach(b=>{
