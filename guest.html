@@ -617,27 +617,8 @@
         (waze ? '\nניווט ב-Waze: https://waze.com/ul?q=' + encodeURIComponent(waze) + '&navigate=yes' : '');
     }
 
-    /* קובץ אירוע תקני (VEVENT) — לאייפון / אייפד / מק / Outlook.
-       המכשיר פותח אותו ביומן המובנה עם כל הפרטים ממולאים, והאורח מאשר "הוספה". */
-    function buildIcsText(){
-      const t = calEventTimes();
-      if (!t) return null;
-      const esc2 = s => String(s||'').replace(/([,;\\])/g,'\\$1').replace(/\n/g,'\\n');
-      return [
-        'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//wedding-rsvp//he','CALSCALE:GREGORIAN','METHOD:PUBLISH',
-        'BEGIN:VEVENT',
-        'UID:' + (guestId || Math.random().toString(36).slice(2)) + '@wedding-rsvp',
-        'DTSTAMP:' + fmtUtc(new Date()),
-        'DTSTART:' + fmtUtc(t.start),
-        'DTEND:'   + fmtUtc(t.end),
-        'SUMMARY:'     + esc2(calTitle()),
-        'LOCATION:'    + esc2(calLocation()),
-        'DESCRIPTION:' + esc2(calDetails()),
-        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(calTitle()),'TRIGGER:-P1D','END:VALARM',
-        'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:' + esc2(calTitle()),'TRIGGER:-PT3H','END:VALARM',
-        'END:VEVENT','END:VCALENDAR'
-      ].join('\r\n');
-    }
+    /* אייפון / אייפד קוראים את הקובץ הסטטי wedding.ics שמתארח לצד הדף הזה.
+       שימו לב: אם משנים תאריך / אולם ב-config.js — צריך לעדכן גם את wedding.ics. */
 
     /* קישור ליומן Google — נפתח כמסך "אירוע חדש" מוכן בתאריך האירוע.
        באנדרואיד זה פותח את אפליקציית היומן; במחשב זה נפתח בלשונית חדשה. */
@@ -675,15 +656,11 @@
       const t = calEventTimes();
       if (!t) return;
 
-      /* אייפון / אייפד — פותחים ישירות את יומן המכשיר (Apple Calendar).
-         ניווט ה-URL אל קובץ האירוע פותח את מסך "הוספה ליומן" עם כל הפרטים,
-         בלי להוריד קובץ ובלי דף ריק. */
+      /* אייפון / אייפד — קישור ישיר לקובץ האירוע (wedding.ics) שמתארח באתר.
+         Safari מזהה text/calendar ופותח את מסך "הוספה ליומן" של אפל עם כל
+         הפרטים — בלי להוריד קובץ. חייב URL אמיתי (לא Blob) כדי שזה יעבוד. */
       if (isIOS()){
-        const url = URL.createObjectURL(
-          new Blob([buildIcsText()], { type:'text/calendar;charset=utf-8' })
-        );
-        window.location.href = url;
-        setTimeout(() => URL.revokeObjectURL(url), 15000);
+        window.location.href = 'wedding.ics?v=' + (cfg.dateISO || '').replace(/\D/g,'');
         return;
       }
 
