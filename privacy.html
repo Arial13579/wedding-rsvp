@@ -1,0 +1,69 @@
+<title>מדיניות פרטיות</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ground:#F6F4EF; --surface:#FFFFFF; --ink:#1D211B; --ink-soft:#5C6157; --line:#E1DED4;
+    --accent:#137A44; --accent-ink:#0B5A31; --accent-wash:#E6F1E8;
+    --display:'Frank Ruhl Libre',Georgia,serif; --body:'Assistant',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#12140F; --surface:#1A1D17; --ink:#ECEEE6; --ink-soft:#A0A69A; --line:#2E332A;
+      --accent:#5AD088; --accent-ink:#8BE0AC; --accent-wash:#1C2A20;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12140F; --surface:#1A1D17; --ink:#ECEEE6; --ink-soft:#A0A69A; --line:#2E332A;
+    --accent:#5AD088; --accent-ink:#8BE0AC; --accent-wash:#1C2A20;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--ground); color:var(--ink); font-family:var(--body); font-size:15.5px; line-height:1.7; margin:0;}
+  .page{max-width:620px; margin:0 auto; padding:0 22px 80px;}
+  header{padding:44px 0 26px; border-bottom:1px solid var(--line); margin-bottom:26px;}
+  .eyebrow{font-size:12px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--accent-ink); margin:0 0 10px;}
+  h1{font-family:var(--display); font-weight:700; font-size:28px; margin:0 0 8px;}
+  .updated{color:var(--ink-soft); font-size:13px;}
+  h2{font-family:var(--display); font-weight:700; font-size:18px; margin:34px 0 10px;}
+  p,li{margin:0 0 10px;}
+  ul{padding-inline-start:20px; margin:0 0 14px;}
+  .box{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin:14px 0;}
+  a{color:var(--accent-ink);}
+  .back{display:inline-block; margin-top:36px; font-size:14px;}
+</style>
+<script>try{var t=localStorage.getItem('themePref');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<div class="page" dir="rtl">
+  <header>
+    <p class="eyebrow">אריאל &amp; מירב · 22.12.2026</p>
+    <h1>מדיניות פרטיות</h1>
+    <p class="updated">עודכן לאחרונה: ספטמבר 2026</p>
+  </header>
+
+  <p>העמוד הזה מסביר בפשטות אילו נתונים אתר אישורי ההגעה הזה שומר, למה, ומי יכול לראות אותם. האתר משמש אך ורק לצורך ניהול ההזמנות לחתונה של אריאל ומירב — הוא לא אוסף מידע לשום מטרה אחרת.</p>
+
+  <h2>אילו נתונים נשמרים</h2>
+  <ul>
+    <li><strong>שם וטלפון</strong> — הוזנו מראש על ידי בעלי השמחה (לא נרשמים על ידי האורח עצמו).</li>
+    <li><strong>תשובת אישור ההגעה</strong> — מגיע / לא מגיע / אולי, ומספר המבוגרים והילדים.</li>
+    <li><strong>זמן העדכון האחרון</strong> של התשובה.</li>
+  </ul>
+  <div class="box">לא נאסף מידע נוסף מעבר לזה: לא כתובת, לא תעודת זהות, לא פרטי תשלום, ולא שום מידע רגיש אחר.</div>
+
+  <h2>איפה זה נשמר</h2>
+  <p>הנתונים נשמרים במסד נתונים <strong>Google Firebase (Firestore)</strong> — שירות אחסון ענן סטנדרטי של Google. האתר עצמו מתארח ב-GitHub Pages (חינמי, ציבורי בקוד אך לא בנתוני האורחים — הנתונים יושבים בנפרד ב-Firebase ומוגנים בכללי הרשאה).</p>
+
+  <h2>מי יכול לראות את המידע</h2>
+  <p>רק בעלי השמחה, דרך התחברות עם חשבון Google מזוהה מראש (לוח הבקרה admin.html). אף אחד אחר — כולל אורחים אחרים — לא יכול לראות את הרשימה המלאה. אורח שפותח את הקישור האישי שלו רואה רק את הפרטים שלו־עצמו.</p>
+
+  <h2>מעקב ופרסום</h2>
+  <p>באתר <strong>אין</strong> כלי מעקב פרסומי, לא Google Analytics, לא פיקסל של פייסבוק/מטא, ולא שום שיתוף מידע עם צד שלישי למטרות שיווק. השירותים החיצוניים היחידים בהם האתר משתמש הם תשתית טכנית בלבד: Google Fonts (גופנים), Firebase (מסד נתונים), וספריית אנימציית קונפטי (עיצוב בלבד, לא אוספת מידע).</p>
+
+  <h2>עוגיות ואחסון מקומי (Cookies / localStorage)</h2>
+  <p>האתר לא משתמש בעוגיות מעקב. הוא כן שומר במכשיר שלכם (localStorage — אחסון מקומי בדפדפן, לא נשלח לשום שרת) העדפות תצוגה בלבד: מצב כהה/בהיר שבחרתם, והגדרות נגישות אם שיניתם אותן. אפשר למחוק את זה בכל רגע דרך הגדרות הדפדפן, זה לא משפיע על תשובת אישור ההגעה.</p>
+
+  <h2>שאלות</h2>
+  <p>לכל שאלה על הפרטיות שלכם באתר הזה — אפשר לפנות ישירות לבעלי השמחה.</p>
+
+  <a class="back" href="guest.html">‹ חזרה לדף ההזמנה</a>
+</div>

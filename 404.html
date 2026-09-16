@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>הדף לא נמצא</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --ground:#F6F4EF; --surface:#FFFFFF; --ink:#1D211B; --ink-soft:#5C6157; --line:#E1DED4;
+    --accent:#137A44; --accent-ink:#0B5A31;
+    --display:'Frank Ruhl Libre',Georgia,serif; --body:'Assistant',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#12140F; --surface:#1A1D17; --ink:#ECEEE6; --ink-soft:#A0A69A; --line:#2E332A;
+      --accent:#5AD088; --accent-ink:#8BE0AC;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#12140F; --surface:#1A1D17; --ink:#ECEEE6; --ink-soft:#A0A69A; --line:#2E332A;
+    --accent:#5AD088; --accent-ink:#8BE0AC;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--ground); color:var(--ink); font-family:var(--body); margin:0; min-height:100vh;
+    display:grid; place-items:center; padding:24px; text-align:center;}
+  .card{max-width:420px;}
+  .num{font-family:var(--display); font-weight:700; font-size:64px; color:var(--accent-ink); margin:0 0 6px;}
+  h1{font-family:var(--display); font-weight:700; font-size:22px; margin:0 0 12px;}
+  p{color:var(--ink-soft); font-size:15px; line-height:1.6; margin:0 0 26px;}
+  .links{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  a{font-family:var(--body); font-weight:600; font-size:14px; text-decoration:none; color:#fff;
+    background:var(--accent); padding:11px 20px; border-radius:12px; transition:filter .15s;}
+  a:hover{filter:brightness(1.08);}
+</style>
+<script>try{var t=localStorage.getItem('themePref');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+  <div class="card">
+    <p class="num">404</p>
+    <h1>הדף הזה לא קיים</h1>
+    <p>ייתכן שהקישור הוקלד לא נכון, או שהעמוד הוזז. אפשר לחזור לדף ההזמנה.</p>
+    <div class="links">
+      <a href="guest.html">לדף ההזמנה</a>
+    </div>
+  </div>
+</body>
+</html>
