@@ -67,8 +67,6 @@
       :root:not([data-theme="dark"]) .pill.pending{ background:rgba(18,38,34,.07); color:var(--text-2); }
       :root:not([data-theme="dark"]) .rowbtn.sent{ background:rgba(18,38,34,.08); color:var(--text); }
       :root:not([data-theme="dark"]) .banner{ color:#8A6200; }
-      :root:not([data-theme="dark"]) .theme-toggle-btn{ background:rgba(18,38,34,.075); border-color:rgba(18,38,34,.12); color:var(--text); }
-      :root:not([data-theme="dark"]) .theme-toggle-btn:hover{ background:rgba(18,38,34,.12); }
     }
     :root[data-theme="light"]{
       --bg:#F1F4F3;
@@ -97,8 +95,6 @@
     :root[data-theme="light"] .pill.pending{ background:rgba(18,38,34,.07); color:var(--text-2); }
     :root[data-theme="light"] .rowbtn.sent{ background:rgba(18,38,34,.08); color:var(--text); }
     :root[data-theme="light"] .banner{ color:#8A6200; }
-    :root[data-theme="light"] .theme-toggle-btn{ background:rgba(18,38,34,.075); border-color:rgba(18,38,34,.12); color:var(--text); }
-    :root[data-theme="light"] .theme-toggle-btn:hover{ background:rgba(18,38,34,.12); }
 
     *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
     html{-webkit-text-size-adjust:100%;}
@@ -159,14 +155,32 @@
     .navbtn:hover{background:var(--glass-3);}
     .navbtn:active{transform:scale(.93);}
     .navbtn.ghost{background:transparent; color:var(--text-2);}
-    .theme-toggle-btn{position:fixed; z-index:50; top:calc(env(safe-area-inset-top) + 9px); left:12px;
-      width:34px; height:34px; padding:0; display:grid; place-items:center;
+    /* ═══ כפתור כהה/בהיר/לפי מערכת — נפתח בסיבוב, בפינה פנויה שלא מכסה כלום ═══ */
+    .theme-widget{position:fixed; z-index:60; right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px));}
+    .theme-fab{position:relative; z-index:2; width:50px; height:50px; border-radius:50%; cursor:pointer;
       font-family:var(--sans); color:var(--text); background:var(--glass-2); border:1px solid var(--brd);
-      border-radius:50%; cursor:pointer; -webkit-backdrop-filter:var(--blur-lite); backdrop-filter:var(--blur-lite);
-      transition:transform .15s, background .2s;}
-    .theme-toggle-btn:hover{background:var(--glass-3);}
-    .theme-toggle-btn:active{transform:scale(.9);}
-    .theme-toggle-btn svg{width:16px; height:16px;}
+      -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
+      box-shadow:var(--shadow), inset 0 1px 0 var(--hi);
+      display:grid; place-items:center; transition:transform .38s cubic-bezier(.2,.9,.3,1.3), background .2s;}
+    .theme-fab svg{width:22px; height:22px;}
+    .theme-fab:hover{background:var(--glass-3);}
+    .theme-fab:active{transform:scale(.92);}
+    .theme-widget.open .theme-fab{transform:rotate(135deg);}
+    .theme-opts{position:absolute; right:2px; bottom:2px; width:46px; height:46px; z-index:1;}
+    .theme-opt{position:absolute; inset:0; border-radius:50%; cursor:pointer;
+      color:var(--text); background:var(--glass-3); border:1px solid var(--brd-2);
+      -webkit-backdrop-filter:var(--blur); backdrop-filter:var(--blur);
+      box-shadow:var(--shadow), inset 0 1px 0 var(--hi);
+      display:grid; place-items:center; opacity:0; pointer-events:none;
+      transform:translate(0,0) rotate(-140deg) scale(.2);
+      transition:transform .42s cubic-bezier(.2,.9,.3,1.45), opacity .25s ease, background .2s, border-color .2s;}
+    .theme-opt svg{width:19px; height:19px;}
+    .theme-opt[aria-pressed="true"]{border-color:var(--teal); color:var(--teal); background:rgba(79,233,211,.18);}
+    .theme-widget.open .theme-opt{opacity:1; pointer-events:auto;}
+    .theme-widget.open .theme-opt[data-i="0"]{transform:translate(-2px,-90px) rotate(0) scale(1); transition-delay:.02s;}
+    .theme-widget.open .theme-opt[data-i="1"]{transform:translate(-62px,-65px) rotate(0) scale(1); transition-delay:.07s;}
+    .theme-widget.open .theme-opt[data-i="2"]{transform:translate(-89px,-5px) rotate(0) scale(1); transition-delay:.12s;}
+    .theme-fab:focus-visible,.theme-opt:focus-visible{outline:2px solid var(--teal); outline-offset:3px;}
 
     .wrap{max-width:1080px; margin:0 auto;
       padding:16px 15px calc(env(safe-area-inset-bottom) + 60px);
@@ -301,7 +315,23 @@
 <body>
   <div class="bg"></div>
 
-  <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="החלפת ערכת נושא"></button>
+  <!-- ═══ כפתור כהה/בהיר/לפי מערכת — לוחצים והוא נפתח בסיבוב לשלוש אפשרויות ═══ -->
+  <div class="theme-widget" id="themeWidget">
+    <div class="theme-opts">
+      <button class="theme-opt" data-i="0" data-v="light" type="button" aria-pressed="false" aria-label="תצוגה בהירה">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>
+      </button>
+      <button class="theme-opt" data-i="1" data-v="dark" type="button" aria-pressed="false" aria-label="תצוגה כהה">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z" fill="currentColor"/></svg>
+      </button>
+      <button class="theme-opt" data-i="2" data-v="system" type="button" aria-pressed="false" aria-label="לפי סוג המכשיר">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 010 18z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <button class="theme-fab" id="themeFab" type="button" aria-expanded="false" aria-label="בחירת ערכת נושא">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.5a8.5 8.5 0 010 17z" fill="currentColor"/></svg>
+    </button>
+  </div>
 
   <!-- ═══ שער ═══ -->
   <div id="gate" class="gate">
@@ -398,17 +428,12 @@
 
     document.getElementById('hTitle').textContent = 'אישורי הגעה · ' + (cfg.couple || '');
 
-    /* ═══ כפתור כהה/בהיר/לפי מערכת ═══ */
+    /* ═══ כפתור כהה/בהיר/לפי מערכת — נפתח בסיבוב לשלוש אפשרויות ═══ */
     (function(){
       var KEY='themePref';
       var root=document.documentElement;
-      var btn=document.getElementById('themeToggleBtn');
-      var ICONS={
-        system:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 010 18z" fill="currentColor"/></svg>',
-        light:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>',
-        dark:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z" fill="currentColor"/></svg>'
-      };
-      var LABEL={system:'תצוגה: לפי המערכת — לחצו למעבר לבהיר',light:'תצוגה: בהיר — לחצו למעבר לכהה',dark:'תצוגה: כהה — לחצו למעבר לפי המערכת'};
+      var widget=document.getElementById('themeWidget');
+      var fab=document.getElementById('themeFab');
       function state(){
         try{ var p=localStorage.getItem(KEY); if(p==='light'||p==='dark') return p; }catch(e){}
         return 'system';
@@ -418,17 +443,27 @@
         if(s!=='system') return s;
         return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       }
+      function setOpen(o){
+        widget.classList.toggle('open', o);
+        fab.setAttribute('aria-expanded', o ? 'true' : 'false');
+      }
       function render(){
         var s=state();
-        if(btn){ btn.innerHTML=ICONS[s]; btn.setAttribute('aria-label',LABEL[s]); }
+        widget.querySelectorAll('.theme-opt').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.v===s ? 'true' : 'false'); });
         var meta=document.querySelector('meta[name="theme-color"]');
         if(meta) meta.setAttribute('content', effective()==='light' ? '#F1F4F3' : '#07080A');
       }
-      if (btn) btn.addEventListener('click', function(){
-        var s=state(), next = s==='system' ? 'light' : (s==='light' ? 'dark' : 'system');
-        try{ if(next==='system') localStorage.removeItem(KEY); else localStorage.setItem(KEY,next); }catch(e){}
-        if(next==='light'||next==='dark') root.setAttribute('data-theme',next); else root.removeAttribute('data-theme');
-        render();
+      fab.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!widget.classList.contains('open')); });
+      document.addEventListener('click', function(e){ if (!widget.contains(e.target)) setOpen(false); });
+      document.addEventListener('keydown', function(e){ if (e.key === 'Escape') setOpen(false); });
+      widget.querySelectorAll('.theme-opt').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var v = btn.dataset.v;
+          try{ if(v==='system') localStorage.removeItem(KEY); else localStorage.setItem(KEY,v); }catch(e){}
+          if(v==='light'||v==='dark') root.setAttribute('data-theme',v); else root.removeAttribute('data-theme');
+          render();
+          setOpen(false);
+        });
       });
       try{ matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(){ if(state()==='system') render(); }); }catch(e){}
       render();
