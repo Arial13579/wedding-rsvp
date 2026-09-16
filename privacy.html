@@ -65,5 +65,12 @@
   <h2>שאלות</h2>
   <p>לכל שאלה על הפרטיות שלכם באתר הזה — אפשר לפנות ישירות לבעלי השמחה.</p>
 
-  <a class="back" href="guest.html">‹ חזרה לדף ההזמנה</a>
+  <a class="back" id="backLink" href="admin.html">‹ חזרה לעמוד הניהול</a>
 </div>
+<script>
+(function(){
+  var a = document.getElementById('backLink');
+  var ref = document.referrer || '';
+  if (/guest\.html/i.test(ref)) { a.href = 'guest.html'; a.textContent = '‹ חזרה לדף ההזמנה'; }
+})();
+</script>
