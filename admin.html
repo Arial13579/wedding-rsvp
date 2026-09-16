@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#07080A">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="dark light">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>דשבורד אישורי הגעה · אריאל & מירב</title>
@@ -37,6 +37,69 @@
       --sans:'Heebo',-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;
       --shadow:0 22px 55px -26px rgba(0,0,0,.7);
     }
+
+    /* ═══ ערכת נושא בהירה — לפי מערכת ההפעלה, או בחירה ידנית דרך הכפתור ═══ */
+    @media (prefers-color-scheme:light){
+      :root:not([data-theme="dark"]){
+        --bg:#F1F4F3;
+        --text:#122622;
+        --text-2:rgba(18,38,34,.62);
+        --text-3:rgba(18,38,34,.36);
+        --teal:#0C8F76;
+        --green:#178A46; --rose:#C23A3A; --amber:#966600; --gray:#5B6570;
+        --glass:rgba(18,38,34,.045);
+        --glass-2:rgba(18,38,34,.075);
+        --glass-3:rgba(18,38,34,.12);
+        --brd:rgba(18,38,34,.12);
+        --brd-2:rgba(18,38,34,.20);
+        --hi:rgba(255,255,255,.6);
+        --shadow:0 22px 50px -30px rgba(18,38,34,.22);
+      }
+      :root:not([data-theme="dark"]) .bg::after{ opacity:.4; }
+      :root:not([data-theme="dark"]) header{ background:rgba(255,255,255,.65); border-bottom:1px solid rgba(18,38,34,.10); }
+      :root:not([data-theme="dark"]) #search{ background:rgba(18,38,34,.045); }
+      :root:not([data-theme="dark"]) #search:focus{ background:rgba(18,38,34,.08); }
+      :root:not([data-theme="dark"]) .seg{ background:rgba(18,38,34,.045); }
+      :root:not([data-theme="dark"]) .seg button.on{ background:rgba(18,38,34,.85); color:#fff; }
+      :root:not([data-theme="dark"]) .pill.yes{ background:rgba(23,138,70,.14); color:#0F6B37; }
+      :root:not([data-theme="dark"]) .pill.no{ background:rgba(194,58,58,.13); color:#A32424; }
+      :root:not([data-theme="dark"]) .pill.maybe{ background:rgba(150,102,0,.14); color:#8A6200; }
+      :root:not([data-theme="dark"]) .pill.pending{ background:rgba(18,38,34,.07); color:var(--text-2); }
+      :root:not([data-theme="dark"]) .rowbtn.sent{ background:rgba(18,38,34,.08); color:var(--text); }
+      :root:not([data-theme="dark"]) .banner{ color:#8A6200; }
+      :root:not([data-theme="dark"]) .theme-toggle-btn{ background:rgba(18,38,34,.075); border-color:rgba(18,38,34,.12); color:var(--text); }
+      :root:not([data-theme="dark"]) .theme-toggle-btn:hover{ background:rgba(18,38,34,.12); }
+    }
+    :root[data-theme="light"]{
+      --bg:#F1F4F3;
+      --text:#122622;
+      --text-2:rgba(18,38,34,.62);
+      --text-3:rgba(18,38,34,.36);
+      --teal:#0C8F76;
+      --green:#178A46; --rose:#C23A3A; --amber:#966600; --gray:#5B6570;
+      --glass:rgba(18,38,34,.045);
+      --glass-2:rgba(18,38,34,.075);
+      --glass-3:rgba(18,38,34,.12);
+      --brd:rgba(18,38,34,.12);
+      --brd-2:rgba(18,38,34,.20);
+      --hi:rgba(255,255,255,.6);
+      --shadow:0 22px 50px -30px rgba(18,38,34,.22);
+    }
+    :root[data-theme="light"] .bg::after{ opacity:.4; }
+    :root[data-theme="light"] header{ background:rgba(255,255,255,.65); border-bottom:1px solid rgba(18,38,34,.10); }
+    :root[data-theme="light"] #search{ background:rgba(18,38,34,.045); }
+    :root[data-theme="light"] #search:focus{ background:rgba(18,38,34,.08); }
+    :root[data-theme="light"] .seg{ background:rgba(18,38,34,.045); }
+    :root[data-theme="light"] .seg button.on{ background:rgba(18,38,34,.85); color:#fff; }
+    :root[data-theme="light"] .pill.yes{ background:rgba(23,138,70,.14); color:#0F6B37; }
+    :root[data-theme="light"] .pill.no{ background:rgba(194,58,58,.13); color:#A32424; }
+    :root[data-theme="light"] .pill.maybe{ background:rgba(150,102,0,.14); color:#8A6200; }
+    :root[data-theme="light"] .pill.pending{ background:rgba(18,38,34,.07); color:var(--text-2); }
+    :root[data-theme="light"] .rowbtn.sent{ background:rgba(18,38,34,.08); color:var(--text); }
+    :root[data-theme="light"] .banner{ color:#8A6200; }
+    :root[data-theme="light"] .theme-toggle-btn{ background:rgba(18,38,34,.075); border-color:rgba(18,38,34,.12); color:var(--text); }
+    :root[data-theme="light"] .theme-toggle-btn:hover{ background:rgba(18,38,34,.12); }
+
     *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
     html{-webkit-text-size-adjust:100%;}
     body{font-family:var(--sans); color:var(--text); background:var(--bg); min-height:100vh;
@@ -96,6 +159,14 @@
     .navbtn:hover{background:var(--glass-3);}
     .navbtn:active{transform:scale(.93);}
     .navbtn.ghost{background:transparent; color:var(--text-2);}
+    .theme-toggle-btn{position:fixed; z-index:50; top:calc(env(safe-area-inset-top) + 9px); left:12px;
+      width:34px; height:34px; padding:0; display:grid; place-items:center;
+      font-family:var(--sans); color:var(--text); background:var(--glass-2); border:1px solid var(--brd);
+      border-radius:50%; cursor:pointer; -webkit-backdrop-filter:var(--blur-lite); backdrop-filter:var(--blur-lite);
+      transition:transform .15s, background .2s;}
+    .theme-toggle-btn:hover{background:var(--glass-3);}
+    .theme-toggle-btn:active{transform:scale(.9);}
+    .theme-toggle-btn svg{width:16px; height:16px;}
 
     .wrap{max-width:1080px; margin:0 auto;
       padding:16px 15px calc(env(safe-area-inset-bottom) + 60px);
@@ -190,6 +261,9 @@
     .rowbtn:active{transform:scale(.95);}
     .rowbtn.sent{background:rgba(255,255,255,.08);}
     .muted{color:var(--text-3);}
+    .admin-foot{text-align:center; font-size:11px; color:var(--text-3); padding:10px 4px 0;}
+    .admin-foot a{color:var(--text-3); text-decoration:none; border-bottom:1px solid transparent; transition:color .15s, border-color .15s;}
+    .admin-foot a:hover{color:var(--teal); border-color:var(--teal);}
     .loading{text-align:center; padding:32px; color:var(--text-2); font-family:var(--serif); font-weight:400; font-size:15px;}
     input[type=checkbox]{width:16px; height:16px; accent-color:var(--teal);}
     .hidden{display:none !important;}
@@ -222,9 +296,12 @@
       .seg button{font-size:11px; padding:8px 2px;}
     }
   </style>
+  <script>try{var t=localStorage.getItem('themePref');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
 <body>
   <div class="bg"></div>
+
+  <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="החלפת ערכת נושא"></button>
 
   <!-- ═══ שער ═══ -->
   <div id="gate" class="gate">
@@ -303,6 +380,9 @@
           </table>
         </div>
       </div>
+      <div class="admin-foot">
+        <a href="privacy.html">מדיניות פרטיות</a> · <a href="terms.html">תקנון ותנאי שימוש</a> · <a href="accessibility.html">הצהרת נגישות</a>
+      </div>
     </div>
   </div>
 
@@ -317,6 +397,42 @@
     let db, auth, guestsCol, GUESTS = [], ageChart, unsub = null;
 
     document.getElementById('hTitle').textContent = 'אישורי הגעה · ' + (cfg.couple || '');
+
+    /* ═══ כפתור כהה/בהיר/לפי מערכת ═══ */
+    (function(){
+      var KEY='themePref';
+      var root=document.documentElement;
+      var btn=document.getElementById('themeToggleBtn');
+      var ICONS={
+        system:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 010 18z" fill="currentColor"/></svg>',
+        light:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>',
+        dark:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z" fill="currentColor"/></svg>'
+      };
+      var LABEL={system:'תצוגה: לפי המערכת — לחצו למעבר לבהיר',light:'תצוגה: בהיר — לחצו למעבר לכהה',dark:'תצוגה: כהה — לחצו למעבר לפי המערכת'};
+      function state(){
+        try{ var p=localStorage.getItem(KEY); if(p==='light'||p==='dark') return p; }catch(e){}
+        return 'system';
+      }
+      function effective(){
+        var s=state();
+        if(s!=='system') return s;
+        return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+      }
+      function render(){
+        var s=state();
+        if(btn){ btn.innerHTML=ICONS[s]; btn.setAttribute('aria-label',LABEL[s]); }
+        var meta=document.querySelector('meta[name="theme-color"]');
+        if(meta) meta.setAttribute('content', effective()==='light' ? '#F1F4F3' : '#07080A');
+      }
+      if (btn) btn.addEventListener('click', function(){
+        var s=state(), next = s==='system' ? 'light' : (s==='light' ? 'dark' : 'system');
+        try{ if(next==='system') localStorage.removeItem(KEY); else localStorage.setItem(KEY,next); }catch(e){}
+        if(next==='light'||next==='dark') root.setAttribute('data-theme',next); else root.removeAttribute('data-theme');
+        render();
+      });
+      try{ matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(){ if(state()==='system') render(); }); }catch(e){}
+      render();
+    })();
 
     if (!cfg.firebase || !cfg.firebase.apiKey){
       showGateError('לא הוגדר Firebase. ערכו את הקובץ config.js לפי ההוראות ב-README.');
