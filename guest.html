@@ -16,6 +16,7 @@
   <meta property="og:url" content="https://arial13579.github.io/wedding-rsvp/guest.html">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="theme-color" content="#0A0B0C">
+  <meta name="color-scheme" content="dark light">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,6 +40,59 @@
       --serif:'Frank Ruhl Libre',Georgia,'Times New Roman',serif;
       --sans:'Heebo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     }
+
+    /* ═══ ערכת נושא בהירה — לפי מערכת ההפעלה, או בחירה ידנית דרך הכפתור ═══ */
+    @media (prefers-color-scheme:light){
+      :root:not([data-theme="dark"]){
+        --bg:#F4F7F6;
+        --panel:rgba(15,44,39,.05);
+        --panel-2:rgba(15,44,39,.08);
+        --edge:rgba(15,44,39,.12);
+        --edge-bright:rgba(15,44,39,.22);
+        --text:#122B27;
+        --text-2:rgba(18,43,39,.62);
+        --text-3:rgba(18,43,39,.38);
+        --teal:#0C8F76;
+        --teal-line:rgba(12,143,118,.4);
+      }
+      :root:not([data-theme="dark"]) .grain{ opacity:.14; }
+      :root:not([data-theme="dark"]) .frame .fallback{ background:linear-gradient(160deg,#ECEFED,#E1E5E3); }
+      :root:not([data-theme="dark"]) .choice.maybe{ background:rgba(15,44,39,.05); }
+      :root:not([data-theme="dark"]) .done .badge.soft{ background:rgba(15,44,39,.05); }
+      :root:not([data-theme="dark"]) .stp button{ background:rgba(15,44,39,.045); }
+      :root:not([data-theme="dark"]) .stp button:hover{ background:rgba(15,44,39,.08); }
+      :root:not([data-theme="dark"]) .answered{ background:rgba(15,44,39,.035); }
+      :root:not([data-theme="dark"]) .a11y-fab{ background:rgba(255,255,255,.8); }
+      :root:not([data-theme="dark"]) .a11y-fab:hover{ background:rgba(12,143,118,.14); }
+      :root:not([data-theme="dark"]) .a11y-opt{ background:rgba(255,255,255,.95); }
+      :root:not([data-theme="dark"]) .theme-toggle button{ background:rgba(255,255,255,.8); }
+      :root:not([data-theme="dark"]) .theme-toggle button:hover{ background:rgba(12,143,118,.14); }
+    }
+    :root[data-theme="light"]{
+      --bg:#F4F7F6;
+      --panel:rgba(15,44,39,.05);
+      --panel-2:rgba(15,44,39,.08);
+      --edge:rgba(15,44,39,.12);
+      --edge-bright:rgba(15,44,39,.22);
+      --text:#122B27;
+      --text-2:rgba(18,43,39,.62);
+      --text-3:rgba(18,43,39,.38);
+      --teal:#0C8F76;
+      --teal-line:rgba(12,143,118,.4);
+    }
+    :root[data-theme="light"] .grain{ opacity:.14; }
+    :root[data-theme="light"] .frame .fallback{ background:linear-gradient(160deg,#ECEFED,#E1E5E3); }
+    :root[data-theme="light"] .choice.maybe{ background:rgba(15,44,39,.05); }
+    :root[data-theme="light"] .done .badge.soft{ background:rgba(15,44,39,.05); }
+    :root[data-theme="light"] .stp button{ background:rgba(15,44,39,.045); }
+    :root[data-theme="light"] .stp button:hover{ background:rgba(15,44,39,.08); }
+    :root[data-theme="light"] .answered{ background:rgba(15,44,39,.035); }
+    :root[data-theme="light"] .a11y-fab{ background:rgba(255,255,255,.8); }
+    :root[data-theme="light"] .a11y-fab:hover{ background:rgba(12,143,118,.14); }
+    :root[data-theme="light"] .a11y-opt{ background:rgba(255,255,255,.95); }
+    :root[data-theme="light"] .theme-toggle button{ background:rgba(255,255,255,.8); }
+    :root[data-theme="light"] .theme-toggle button:hover{ background:rgba(12,143,118,.14); }
+
     *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
     html{-webkit-text-size-adjust:100%;}
     html,body{min-height:100%;}
@@ -240,6 +294,9 @@
     .cal-btn svg{width:16px; height:16px; stroke:var(--teal); flex:none;}
 
     .foot{text-align:center; color:var(--text-3); font-size:11px; letter-spacing:.4px; margin-top:6px;}
+    .foot-legal{margin-top:2px;}
+    .foot-legal a{color:var(--text-3); text-decoration:none; border-bottom:1px solid transparent; transition:color .15s, border-color .15s;}
+    .foot-legal a:hover{color:var(--teal); border-color:var(--teal-line);}
 
     .invalid{text-align:center; padding:52px 26px;}
     .invalid .badge{width:54px; height:54px; margin:0 auto 18px; border-radius:50%; display:grid; place-items:center;
@@ -267,6 +324,19 @@
       .checkmark{animation:none !important; stroke-dashoffset:0;}
       .frame::before{animation:none !important;}
     }
+
+    /* ═══ כפתור כהה/בהיר/לפי מערכת ═══ */
+    .theme-toggle{position:fixed; left:16px; top:calc(16px + env(safe-area-inset-top, 0px)); z-index:90;}
+    .theme-toggle button{width:46px; height:46px; border-radius:50%; cursor:pointer;
+      border:1px solid rgba(59,224,203,.5); background:rgba(10,12,13,.74); color:var(--teal);
+      -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4);
+      box-shadow:0 14px 32px -12px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.14);
+      display:grid; place-items:center;
+      transition:transform .25s cubic-bezier(.2,.9,.3,1.3), background .2s;}
+    .theme-toggle button svg{width:21px; height:21px;}
+    .theme-toggle button:hover{background:rgba(59,224,203,.16);}
+    .theme-toggle button:active{transform:scale(.9);}
+    .theme-toggle button:focus-visible{outline:2px solid var(--teal); outline-offset:3px;}
 
     /* ═══ תפריט נגישות (אתר האורחים בלבד) ═══ */
     .a11y{position:fixed; left:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); z-index:90;}
@@ -316,6 +386,7 @@
       animation:none !important; transition-duration:.001s !important; scroll-behavior:auto !important;}
   </style>
   <script>try{var p=JSON.parse(localStorage.getItem('a11yPrefs')||'{}'),r=document.documentElement;if(p.contrast)r.classList.add('a11y-contrast');if(p.still)r.classList.add('a11y-still');}catch(e){}</script>
+  <script>try{var t=localStorage.getItem('themePref');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
 <body>
   <div class="bg"></div>
@@ -324,6 +395,47 @@
   <main class="stage" id="stage">
     <div class="loading">רגע…</div>
   </main>
+
+  <!-- ═══ כפתור כהה/בהיר/לפי מערכת ═══ -->
+  <div class="theme-toggle">
+    <button id="themeToggleBtn" type="button" aria-label="החלפת ערכת נושא"></button>
+  </div>
+  <script>
+  (function(){
+    var KEY='themePref';
+    var root=document.documentElement;
+    var btn=document.getElementById('themeToggleBtn');
+    var ICONS={
+      system:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 010 18z" fill="currentColor"/></svg>',
+      light:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/></svg>',
+      dark:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z" fill="currentColor"/></svg>'
+    };
+    var LABEL={system:'תצוגה: לפי המערכת — לחצו למעבר לבהיר',light:'תצוגה: בהיר — לחצו למעבר לכהה',dark:'תצוגה: כהה — לחצו למעבר לפי המערכת'};
+    function state(){
+      try{ var p=localStorage.getItem(KEY); if(p==='light'||p==='dark') return p; }catch(e){}
+      return 'system';
+    }
+    function effective(){
+      var s=state();
+      if(s!=='system') return s;
+      return matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    function render(){
+      var s=state();
+      if(btn){ btn.innerHTML=ICONS[s]; btn.setAttribute('aria-label',LABEL[s]); }
+      var meta=document.querySelector('meta[name="theme-color"]');
+      if(meta) meta.setAttribute('content', effective()==='light' ? '#F4F7F6' : '#0A0B0C');
+    }
+    if (btn) btn.addEventListener('click', function(){
+      var s=state(), next = s==='system' ? 'light' : (s==='light' ? 'dark' : 'system');
+      try{ if(next==='system') localStorage.removeItem(KEY); else localStorage.setItem(KEY,next); }catch(e){}
+      if(next==='light'||next==='dark') root.setAttribute('data-theme',next); else root.removeAttribute('data-theme');
+      render();
+    });
+    try{ matchMedia('(prefers-color-scheme: light)').addEventListener('change', function(){ if(state()==='system') render(); }); }catch(e){}
+    render();
+  })();
+  </script>
 
   <!-- ═══ תפריט נגישות (אתר האורחים בלבד) ═══ -->
   <div class="a11y" id="a11y">
@@ -504,6 +616,9 @@
         <div id="done" class="glass done hidden"></div>
 
         <div class="foot">אפשר לחזור לקישור הזה ולעדכן את התשובה בכל רגע</div>
+        <div class="foot foot-legal">
+          <a href="privacy.html">מדיניות פרטיות</a> · <a href="terms.html">תקנון</a> · <a href="accessibility.html">הצהרת נגישות</a>
+        </div>
       `;
 
       startCountdown();
@@ -576,157 +691,4 @@
 
     function finish(status, adults, children){
       document.getElementById('loading').classList.add('hidden');
-      /* מסירים את כפתור היומן והבאנר שהוצגו במצב "כבר סימנתם" —
-         כדי שיישאר רק כפתור יומן אחד, זה שבמסך הסיום. */
-      ['calTop','answeredBanner'].forEach(id=>{
-        const el = document.getElementById(id); if (el) el.remove();
-      });
-      const d = document.getElementById('done');
-      let badge='soft', title='', text='';
-      if (status==='yes'){
-        badge='ok'; title='נתראה בשמחה';
-        text = 'רשמנו ' + adults + ' מבוגרים' + (children ? ' ו-' + children + ' ילדים' : '') + '.';
-        flowerBurst();
-      } else if (status==='no'){
-        title='חבל שלא תוכלו להגיע'; text='תמיד אפשר לשנות את התשובה דרך הקישור הזה.';
-        petalFall();
-      } else {
-        title='אין בעיה'; text='נזכיר לכם שוב בעוד כשבוע.';
-      }
-      d.innerHTML = `
-        <div class="badge ${badge}">${badge==='ok'
-          ? '<svg viewBox="0 0 24 24"><path class="checkmark" d="M4 12.5l5 5L20 6.5"/></svg>'
-          : '<b>·</b>'}</div>
-        <h2>${title}</h2><p>${text}</p>
-        ${status==='yes' ? calendarButtonsHtml() : ''}`;
-      d.classList.remove('hidden');
-      wireCalButtons();
-    }
-
-    const CAL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
-
-    function calEventTimes(){
-      if (!cfg.dateISO) return null;
-      const start = new Date(cfg.dateISO);
-      if (isNaN(start)) return null;
-      const end = new Date(start.getTime() + (cfg.eventDurationHours || 4) * 3600 * 1000);
-      return { start, end };
-    }
-    function fmtUtc(d){ return d.toISOString().replace(/[-:]|\.\d{3}/g,''); }
-
-    function calTitle(){ return 'החתונה של ' + (cfg.couple || ''); }
-    function calLocation(){ return [cfg.venueName, cfg.venueAddress].filter(Boolean).join(', '); }
-    function calDetails(){
-      const waze = cfg.wazeQuery || cfg.venueAddress || '';
-      return 'מחכים לראותכם לחגוג!' +
-        (waze ? '\nניווט ב-Waze: https://waze.com/ul?q=' + encodeURIComponent(waze) + '&navigate=yes' : '');
-    }
-
-    /* אייפון / אייפד קוראים את הקובץ הסטטי wedding.ics שמתארח לצד הדף הזה.
-       שימו לב: אם משנים תאריך / אולם ב-config.js — צריך לעדכן גם את wedding.ics. */
-
-    /* קישור ליומן Google — נפתח כמסך "אירוע חדש" מוכן בתאריך האירוע.
-       באנדרואיד זה פותח את אפליקציית היומן; במחשב זה נפתח בלשונית חדשה. */
-    function buildGoogleUrl(){
-      const t = calEventTimes();
-      if (!t) return null;
-      const p = new URLSearchParams({
-        action: 'TEMPLATE',
-        text:   calTitle(),
-        dates:  fmtUtc(t.start) + '/' + fmtUtc(t.end),
-        details: calDetails(),
-        location: calLocation()
-      });
-      return 'https://calendar.google.com/calendar/render?' + p.toString();
-    }
-
-    function calendarButtonsHtml(){
-      if (!calEventTimes()) return '';
-      return `
-        <div class="cal-row">
-          <button type="button" class="cal-btn js-cal">${CAL_ICON}הוספת התאריך ליומן</button>
-        </div>`;
-    }
-    /* אייפון / אייפד בלבד (כולל iPadOS שמתחזה ל-Mac) — לא כולל מק שולחני */
-    function isIOS(){
-      const ua = navigator.userAgent || '';
-      if (/iPhone|iPod/.test(ua)) return true;
-      if (/iPad/.test(ua)) return true;
-      // iPadOS 13+ מדווח כ-Macintosh אך יש לו מסך מגע
-      return /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
-    }
-    function isAndroid(){ return /Android/i.test(navigator.userAgent || ''); }
-
-    function addToCalendar(){
-      const t = calEventTimes();
-      if (!t) return;
-
-      /* אייפון / אייפד — קישור ישיר לקובץ האירוע (wedding.ics) שמתארח באתר.
-         Safari מזהה text/calendar ופותח את מסך "הוספה ליומן" של אפל עם כל
-         הפרטים — בלי להוריד קובץ. חייב URL אמיתי (לא Blob) כדי שזה יעבוד. */
-      if (isIOS()){
-        window.location.href = 'wedding.ics?v=' + (cfg.dateISO || '').replace(/\D/g,'');
-        return;
-      }
-
-      /* אנדרואיד — פותח את אפליקציית יומן Google של הטלפון עם האירוע מוכן לאישור.
-         מחשב (Windows / Mac / Linux) — יומן Google בלשונית חדשה, מוכן לשמירה. */
-      const g = buildGoogleUrl();
-      if (!g) return;
-      if (isAndroid()) window.location.href = g;
-      else if (!window.open(g, '_blank', 'noopener')) window.location.href = g;
-    }
-    function wireCalButtons(){
-      document.querySelectorAll('.js-cal').forEach(b=>{
-        if (!b._wired){ b._wired = true; b.addEventListener('click', addToCalendar); }
-      });
-    }
-
-    function fail(){
-      document.getElementById('loading').classList.add('hidden');
-      const d = document.getElementById('done');
-      d.innerHTML = `<div class="badge soft"><b>!</b></div>
-        <h2>משהו השתבש</h2><p>נסו לרענן את הדף ולנסות שוב.</p>`;
-      d.classList.remove('hidden');
-      document.getElementById('choose').classList.remove('hidden');
-    }
-
-    function flowerBurst(){
-      if (typeof confetti !== 'function' || reduce || document.documentElement.classList.contains('a11y-still')) return;
-      let flowers = null;
-      try{
-        flowers = ['💮','💮','🌼','💮'].map(e => confetti.shapeFromText({ text:e, scalar:3.6 }));
-      }catch(e){ flowers = null; }
-      const opts = flowers
-        ? { shapes:flowers, scalar:1.15, gravity:.75, drift:.15, ticks:260 }
-        : { colors:['#FFFFFF','#F0F4F3','#3BE0CB','#16A34A'], scalar:1.1, shapes:['circle'] };
-      confetti({ particleCount:42, spread:75, startVelocity:42, origin:{y:.58}, ...opts });
-      setTimeout(()=>confetti({ particleCount:24, angle:60,  spread:60, startVelocity:36, origin:{x:0,y:.62}, ...opts }),150);
-      setTimeout(()=>confetti({ particleCount:24, angle:120, spread:60, startVelocity:36, origin:{x:1,y:.62}, ...opts }),300);
-    }
-
-    function petalFall(){
-      if (typeof confetti !== 'function' || reduce || document.documentElement.classList.contains('a11y-still')) return;
-      let petal = null;
-      try{ petal = confetti.shapeFromText({ text:'🥀', scalar:2 }); }catch(e){ petal = null; }
-      const opts = petal
-        ? { shapes:[petal], scalar:1, gravity:.5, drift:0, ticks:200 }
-        : { colors:['#DC2626','#8C8C97'], scalar:.6 };
-      confetti({ particleCount:14, spread:80, startVelocity:14, origin:{y:.35}, ...opts });
-    }
-
-    /* dd.mm.yyyy — משמאל לימין */
-    function dmy(c){
-      if (c.dateText) return c.dateText;
-      if (!c.dateISO) return '';
-      const d = new Date(c.dateISO);
-      return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
-    }
-    function esc(s){
-      return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    }
-
-    boot();
-  </script>
-</body>
-</html>
+  
