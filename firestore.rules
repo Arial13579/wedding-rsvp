@@ -1,39 +1,83 @@
 rules_version = '2';
 
-// ═══════════════════════════════════════════════════════════════════════
-//  כללי אבטחה ל-Firestore
-//  מדביקים את התוכן הזה ב: Firebase Console ▸ Firestore Database ▸ Rules
-//  ואז לוחצים Publish.
-// ═══════════════════════════════════════════════════════════════════════
-
+// Wedding RSVP — security rules.
+// Paste into: Firebase Console ▸ Firestore Database ▸ Rules ▸ Publish.
+// Owner: arielkahalani1@gmail.com (full access).
+// Collaborators: people who joined through an active share link; they manage only the guests they added.
+// Guests: anyone holding a guest's private token can read that one invitation and answer it.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ---- אורחים ----
-    match /guests/{id} {
+    function signedIn() { return request.auth != null; }
 
-      // אורח בודד יכול לקרוא את הרשומה שלו לפי המזהה שקיבל בקישור.
-      allow get: if true;
-
-      // רק מנהל מחובר יכול לראות את *כל* רשימת האורחים / להוסיף / למחוק.
-      allow list, create, delete: if request.auth != null;
-
-      // עדכון:
-      //   • מנהל מחובר — הכל.
-      //   • אורח לא מחובר — רק שדות התשובה, בלי לגעת בשם/טלפון.
-      allow update: if request.auth != null
-        || (
-             request.resource.data.name  == resource.data.name &&
-             request.resource.data.phone == resource.data.phone &&
-             request.resource.data.diff(resource.data).affectedKeys()
-               .hasOnly(['status', 'adults', 'children', 'total', 'updatedAt', 'remindOn'])
-           );
+    function isOwner() {
+      return signedIn()
+        && request.auth.token.email == 'arielkahalani1@gmail.com'
+        && request.auth.token.email_verified == true;
     }
 
-    // ---- מטא (הגדרות אירוע אופציונליות) ----
-    match /meta/{doc} {
-      allow read:  if true;
-      allow write: if request.auth != null;
+    function collabPath() {
+      return /databases/$(database)/documents/collaborators/$(request.auth.uid);
+    }
+
+    function isCollab() {
+      return signedIn() && exists(collabPath()) && get(collabPath()).data.active == true;
+    }
+
+    function isAdmin() { return isOwner() || isCollab(); }
+
+    function validCount(n) { return n is int && n >= 0 && n <= 30; }
+
+    // Public event details + invitation image. Only the owner edits them.
+    match /meta/{docId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow write: if isOwner();
+    }
+
+    match /guests/{guestId} {
+      allow get: if true;
+      allow list: if isOwner() || (isCollab() && resource.data.addedByUid == request.auth.uid);
+
+      allow create: if isAdmin()
+        && request.resource.data.addedByUid == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 120;
+
+      allow delete: if isOwner() || (isCollab() && resource.data.addedByUid == request.auth.uid);
+
+      allow update: if isOwner()
+        || (isCollab()
+            && resource.data.addedByUid == request.auth.uid
+            && request.resource.data.addedByUid == request.auth.uid)
+        // The guest answering from the invitation page
+        || (request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status', 'adults', 'children', 'total', 'updatedAt', 'remindOn'])
+            && request.resource.data.status in ['yes', 'maybe', 'no']
+            && validCount(request.resource.data.adults)
+            && validCount(request.resource.data.children)
+            && request.resource.data.total == request.resource.data.adults + request.resource.data.children
+            && request.resource.data.updatedAt == request.time);
+    }
+
+    match /shareLinks/{token} {
+      allow get: if signedIn();
+      allow list, create, update, delete: if isOwner();
+    }
+
+    match /collaborators/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isOwner());
+      allow list: if isOwner();
+      // Joining with an active share link
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.auth.token.email_verified == true
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.active == true
+        && exists(/databases/$(database)/documents/shareLinks/$(request.resource.data.via))
+        && get(/databases/$(database)/documents/shareLinks/$(request.resource.data.via)).data.active == true;
+      allow update, delete: if isOwner();
     }
   }
 }
