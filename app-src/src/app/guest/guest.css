@@ -62,7 +62,7 @@ a.g-row:active { background: rgba(0, 0, 0, .05); }
 .g-choice i { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: #fff; }
 .g-choice i svg { width: 26px; height: 26px; }
 .g-choice.yes i { background: var(--yes); box-shadow: 0 8px 18px rgba(52, 199, 89, .35); }
-.g-choice.maybe i { background: var(--maybe); box-shadow: 0 8px 18px rgba(255, 149, 0, .3); }
+.g-choice.maybe i { background: var(--maybe); box-shadow: 0 8px 18px rgba(0, 0, 0, .15); }
 .g-choice.no i { background: var(--no); box-shadow: 0 8px 18px rgba(255, 59, 48, .3); }
 .g-choice.yes { color: var(--yes-ink); } .g-choice.maybe { color: var(--maybe-ink); } .g-choice.no { color: var(--no-ink); }
 
@@ -80,7 +80,7 @@ a.g-row:active { background: rgba(0, 0, 0, .05); }
 .g-primary { min-height: 52px; border-radius: 14px; font-size: 17px; font-weight: 600; color: #fff; transition: transform .2s var(--ease-out), opacity .2s; }
 .g-primary:active { transform: scale(.98); opacity: .85; }
 .g-primary:disabled { opacity: .55; }
-.g-primary.yes { background: var(--yes); } .g-primary.maybe { background: var(--maybe); } .g-primary.no { background: var(--no); }
+.g-primary.yes { background: var(--yes); } .g-primary.maybe { background: #636366; } .g-primary.no { background: var(--no); }
 .g-link { color: var(--accent-ink); font-size: 15px; align-self: center; padding: 6px 10px; }
 .g-note { text-align: center; color: var(--muted); font-size: 15px; line-height: 1.5; }
 

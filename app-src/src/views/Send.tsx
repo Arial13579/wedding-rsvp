@@ -33,8 +33,8 @@ const GROUPS: GroupDef[] = [
   { key: 'reminders', title: 'תזכורות אוטומטיות', desc: 'לא ענו או מתלבטים, לפי הכללים', icon: '⏰', color: '#ff9500', template: 'reminderTemplate', test: (g, s) => !!reminderReason(g, s) },
   { key: 'eve', title: 'תזכורת ליום האירוע', desc: 'למי שאישר, עם קישור לניווט', icon: '🚗', color: '#30b0c7', template: 'eveTemplate', visible: isEveWindow, test: (g) => g.status === 'yes' },
   { key: 'thanks', title: 'תודה שהגעתם', desc: 'אחרי החתונה, למי שאישר', icon: '🤍', color: '#af52de', template: 'thanksTemplate', visible: (s) => !!s.eventDate && Date.now() > Date.parse(s.eventDate), test: (g) => g.status === 'yes' },
-  { key: 'pending', title: 'עוד לא ענו', desc: 'קיבלו הזמנה ולא השיבו', icon: '⏳', color: '#8e8e93', template: 'reminderTemplate', test: (g) => g.status === 'pending' && g.sentCount > 0 },
-  { key: 'maybe', title: 'מתלבטים', desc: 'סימנו שעדיין מתלבטים', icon: '🤔', color: '#ff9500', template: 'reminderTemplate', test: (g) => g.status === 'maybe' },
+  { key: 'pending', title: 'עוד לא ענו', desc: 'קיבלו הזמנה ולא השיבו', icon: '⏳', color: '#aeaeb2', template: 'reminderTemplate', test: (g) => g.status === 'pending' && g.sentCount > 0 },
+  { key: 'maybe', title: 'מתלבטים', desc: 'סימנו שעדיין מתלבטים', icon: '🤔', color: '#8e8e93', template: 'reminderTemplate', test: (g) => g.status === 'maybe' },
   { key: 'notYes', title: 'לא אישרו הגעה', desc: 'לא ענו ומתלבטים יחד', icon: '📣', color: '#5856d6', template: 'reminderTemplate', test: (g) => g.status === 'pending' || g.status === 'maybe' },
   { key: 'yes', title: 'אישרו הגעה', desc: 'עדכון למי שמגיע', icon: '🎉', color: '#34c759', template: 'reminderTemplate', test: (g) => g.status === 'yes' },
   { key: 'all', title: 'כל המוזמנים', desc: 'חוץ ממי שסימן שלא מגיע', icon: '👥', color: '#007aff', template: 'inviteTemplate', test: (g) => g.status !== 'no' },
@@ -207,7 +207,7 @@ export default function SendPage() {
         <Group header="ההודעה" footer={<>משתנים: {'{name}'} שם · {'{couple}'} הזוג · {'{date}'} תאריך · {'{venue}'} מקום · {'{link}'} קישור אישי · {'{waze}'} ניווט</>}>
           <textarea className="textarea" style={{ borderRadius: 0 }} rows={6} value={template} onChange={(e) => setTemplate(e.target.value)} aria-label="נוסח ההודעה" />
         </Group>
-        {['inviteTemplate', 'reminderTemplate'].includes(def.template) && !template.includes('{link}') && <div className="hint center" style={{ color: 'var(--maybe-ink)' }}>⚠️ בלי {'{link}'} האורח לא יוכל לאשר הגעה.</div>}
+        {['inviteTemplate', 'reminderTemplate'].includes(def.template) && !template.includes('{link}') && <div className="hint center" style={{ color: 'var(--warn-ink)' }}>⚠️ בלי {'{link}'} האורח לא יוכל לאשר הגעה.</div>}
 
         <div className="stack" style={{ gap: 7 }}>
           <div className="group-header">שליחה דרך</div>
@@ -231,7 +231,7 @@ export default function SendPage() {
     <button key={gr.key} className="cell indent-icon" onClick={() => setGroup(gr.key)}>
       <span className="cell-icon" style={{ background: gr.color, fontSize: 16 }}>{gr.icon}</span>
       <span className="grow"><span className="cell-title" style={{ display: 'block' }}>{gr.title}</span><span className="cell-sub">{gr.desc}</span></span>
-      <span className="cell-value num" style={gr.key === 'reminders' && groupCounts[gr.key] ? { color: 'var(--maybe-ink)', fontWeight: 600 } : undefined}>{groupCounts[gr.key] || 0}</span>
+      <span className="cell-value num" style={gr.key === 'reminders' && groupCounts[gr.key] ? { color: 'var(--warn-ink)', fontWeight: 600 } : undefined}>{groupCounts[gr.key] || 0}</span>
       <Chevron />
     </button>
   );

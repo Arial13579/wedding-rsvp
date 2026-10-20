@@ -120,7 +120,7 @@ export function ContactImport({ open, onClose, existingPhones, tags }: { open: b
                   <span className={`check ${on ? 'on' : ''}`}>{on && <IconCheck width={14} height={14} />}</span>
                   <span className="grow">
                     <span className="li-title" style={{ display: 'block' }}>{c.name}</span>
-                    <span className="li-sub"><span dir="ltr">{formatPhone(c.phone)}</span>{exists && <span style={{ color: 'var(--maybe-ink)' }}>· כבר ברשימה</span>}</span>
+                    <span className="li-sub"><span dir="ltr">{formatPhone(c.phone)}</span>{exists && <span style={{ color: 'var(--warn-ink)' }}>· כבר ברשימה</span>}</span>
                   </span>
                 </button>
               );

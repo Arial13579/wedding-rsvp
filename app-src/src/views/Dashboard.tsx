@@ -3,13 +3,13 @@
 import { useMemo } from 'react';
 import { useAdminData } from '@/components/AdminShell';
 import { useAuth } from '@/components/AuthGate';
-import { AreaLine, Rings, StackedBars, type StackRow } from '@/components/Charts';
+import { AreaLine, Donut, StackedBars, type StackRow } from '@/components/Charts';
 import { Countdown } from '@/components/Countdown';
 import { WhoList } from '@/components/WhoList';
 import { Chevron, Group, Initials, Spinner } from '@/components/ui';
 import { hebrewDate, longDate, relativeTime } from '@/lib/format';
 import { dueReminders, isEveWindow } from '@/lib/reminders';
-import { DIET_LABEL, STATUS_META, STATUS_ORDER, type Guest, type Status } from '@/lib/types';
+import { DIET_LABEL, STATUS_ORDER, type Guest, type Status } from '@/lib/types';
 
 function emptyCounts(): Record<Status, number> {
   return { yes: 0, maybe: 0, no: 0, pending: 0 };
@@ -97,6 +97,7 @@ export default function Dashboard() {
   const eventDate = settings.eventDate ? new Date(settings.eventDate) : null;
   const eventPassed = !!eventDate && Date.now() > eventDate.getTime();
   const people = stats.adults + stats.kids;
+  const unknown = stats.counts.maybe + stats.counts.pending;
   const pct = (n: number, d: number) => (d ? n / d : 0);
 
   const head = (
@@ -134,41 +135,52 @@ export default function Dashboard() {
         </Group>
       )}
 
-      {/* Rings */}
-      <div className="card hero-stat">
-        <div className="row" style={{ gap: 18, alignItems: 'center' }}>
-          <Rings rings={[
-            { label: 'נשלחו', value: pct(stats.sent, stats.total), color: '#30b0c7' },
-            { label: 'ענו', value: pct(stats.responded, stats.total), color: '#ff9500' },
-            { label: 'אישרו', value: pct(stats.counts.yes, stats.total), color: '#34c759' },
-          ]} size={138} />
-          <div className="rings-legend grow">
-            <div><div className="rl-label" style={{ color: '#1d97ad' }}>נשלחו</div><div className="rl-value">{stats.sent}<span className="rl-sub">/{stats.total}</span></div></div>
-            <div><div className="rl-label" style={{ color: 'var(--maybe-ink)' }}>ענו</div><div className="rl-value">{stats.responded}<span className="rl-sub">/{stats.total}</span></div></div>
-            <div><div className="rl-label" style={{ color: 'var(--yes-ink)' }}>אישרו</div><div className="rl-value">{stats.counts.yes}<span className="rl-sub">/{stats.total}</span></div></div>
+      {/* Answers at a glance: green = coming, gray = not known yet, red = not coming */}
+      <div className="card">
+        <div className="card-title" style={{ marginBottom: 6 }}>תשובות <span className="card-sub">{stats.total} הזמנות</span></div>
+        <div className="row wrap" style={{ gap: 18, justifyContent: 'center' }}>
+          <Donut
+            size={170}
+            centerValue={String(people)}
+            centerLabel="אורחים מגיעים"
+            slices={[
+              { key: 'yes', label: 'מגיעים', value: stats.counts.yes, color: 'var(--yes)' },
+              { key: 'unknown', label: 'עוד לא יודעים', value: unknown, color: 'var(--maybe)' },
+              { key: 'no', label: 'לא מגיעים', value: stats.counts.no, color: 'var(--no)' },
+            ]}
+          />
+          <div className="grow stack" style={{ gap: 0, minWidth: 190 }}>
+            {[
+              { href: '#guests?status=yes', color: 'var(--yes)', label: 'מגיעים', value: stats.counts.yes, sub: `${people} אורחים · ${stats.adults} מבוגרים, ${stats.kids} ילדים` },
+              { href: '#guests?status=unknown', color: 'var(--maybe)', label: 'עוד לא יודעים', value: unknown, sub: `${stats.counts.maybe} מתלבטים · ${stats.counts.pending} לא ענו` },
+              { href: '#guests?status=no', color: 'var(--no)', label: 'לא מגיעים', value: stats.counts.no, sub: 'לא יקבלו יותר הודעות' },
+            ].map((r) => (
+              <a key={r.label} href={r.href} className="cell" style={{ paddingInline: 0 }}>
+                <i className="dot" style={{ background: r.color, width: 12, height: 12 }} />
+                <span className="grow">
+                  <span style={{ display: 'block', fontWeight: 600 }}>{r.label}</span>
+                  <span className="cell-sub">{r.sub}</span>
+                </span>
+                <span className="num" style={{ fontSize: 24, fontWeight: 700 }}>{r.value}</span>
+              </a>
+            ))}
           </div>
         </div>
-        <div style={{ height: 0.5, background: 'var(--separator)', margin: '16px 0 12px' }} />
-        <div className="row" style={{ alignItems: 'flex-end' }}>
-          <div className="grow">
-            <div className="kpi-label">צפי אורחים</div>
-            <div className="num" style={{ fontSize: 44, fontWeight: 700, lineHeight: 1.05 }}>{people}</div>
-          </div>
-          <div className="muted" style={{ fontSize: 15, textAlign: 'end' }}>{stats.adults} מבוגרים<br />{stats.kids} ילדים</div>
+        <div className="progress" style={{ height: 12, marginTop: 14 }} role="img" aria-label={`${stats.counts.yes} מגיעים, ${unknown} עוד לא יודעים, ${stats.counts.no} לא מגיעים`}>
+          <i style={{ width: `${pct(stats.counts.yes, stats.total) * 100}%`, background: 'var(--yes)' }} />
+          <i style={{ width: `${pct(unknown, stats.total) * 100}%`, background: 'var(--maybe)' }} />
+          <i style={{ width: `${pct(stats.counts.no, stats.total) * 100}%`, background: 'var(--no)' }} />
         </div>
       </div>
+
+      <Group header="שליחה">
+        <div className="cell" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 8 }}>
+          <div className="row"><span className="grow">קיבלו הזמנה</span><span className="num cell-value">{stats.sent} מתוך {stats.total}</span></div>
+          <div className="progress"><i style={{ width: `${pct(stats.sent, stats.total) * 100}%`, background: 'var(--accent)', borderRadius: 99 }} /></div>
+        </div>
+      </Group>
 
       {settings.eventDate && !eventPassed && <div className="card"><Countdown iso={settings.eventDate} variant="compact" /></div>}
-
-      <div className="grid-4">
-        {STATUS_ORDER.map((k) => (
-          <a key={k} href={`#guests?status=${k}`} className="card kpi">
-            <div className="kpi-label" style={{ color: STATUS_META[k].ink }}><i className="dot" style={{ background: STATUS_META[k].color }} />{STATUS_META[k].label}</div>
-            <div className="kpi-value">{stats.counts[k]}</div>
-            <div className="kpi-foot">{Math.round(pct(stats.counts[k], stats.total) * 100)}% מהמוזמנים</div>
-          </a>
-        ))}
-      </div>
 
       <WhoList guests={guests!} />
 
@@ -204,7 +216,7 @@ export default function Dashboard() {
       )}
 
       <div className="card">
-        <div className="card-title">קצב תשובות <span className="card-sub">21 ימים</span></div>
+        <div className="card-title">כמה ענו עד היום <span className="card-sub">21 ימים אחרונים</span></div>
         <AreaLine points={stats.timeline} />
       </div>
 

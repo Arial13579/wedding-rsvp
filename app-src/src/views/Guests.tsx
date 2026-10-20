@@ -12,9 +12,20 @@ import { buildMessage, guestLink, guestsToCsv, whatsappUrl } from '@/lib/invite'
 import { formatPhone, normalizePhone } from '@/lib/phone';
 import { relativeTime, shortDate } from '@/lib/format';
 import { nextReminderAt } from '@/lib/reminders';
-import { DIET_LABEL, STATUS_META, STATUS_ORDER, type Guest, type Status } from '@/lib/types';
+import { DIET_LABEL, type Guest, type Status } from '@/lib/types';
 
-type Filter = Status | 'all';
+type Filter = Status | 'all' | 'unknown';
+
+// Chip order: the three answers (green / gray / red), then the two kinds of "not known yet"
+const CHIPS: { key: Filter; label: string; color?: string }[] = [
+  { key: 'all', label: 'הכול' },
+  { key: 'yes', label: 'מגיעים', color: 'var(--yes)' },
+  { key: 'unknown', label: 'לא יודעים', color: 'var(--maybe)' },
+  { key: 'no', label: 'לא מגיעים', color: 'var(--no)' },
+  { key: 'maybe', label: 'מתלבטים', color: 'var(--maybe)' },
+  { key: 'pending', label: 'לא ענו', color: 'var(--pending)' },
+];
+const matches = (f: Filter, s: Status) => f === 'all' || f === s || (f === 'unknown' && (s === 'maybe' || s === 'pending'));
 
 export default function GuestsPage() {
   const { guests, settings, error } = useAdminData();
@@ -34,8 +45,8 @@ export default function GuestsPage() {
   const actions = (guests || []).find((g) => g.id === actionsId) || null;
 
   const counts = useMemo(() => {
-    const c: Record<Filter, number> = { all: 0, yes: 0, maybe: 0, no: 0, pending: 0 };
-    (guests || []).forEach((g) => { if (!tagFilter || g.tag === tagFilter) { c.all++; c[g.status]++; } });
+    const c: Record<Filter, number> = { all: 0, yes: 0, maybe: 0, no: 0, pending: 0, unknown: 0 };
+    (guests || []).forEach((g) => { if (!tagFilter || g.tag === tagFilter) { c.all++; c[g.status]++; if (g.status === 'maybe' || g.status === 'pending') c.unknown++; } });
     return c;
   }, [guests, tagFilter]);
 
@@ -43,7 +54,7 @@ export default function GuestsPage() {
     const s = q.trim();
     const digits = s.replace(/\D/g, '');
     return (guests || []).filter((g) =>
-      (filter === 'all' || g.status === filter) &&
+      matches(filter, g.status) &&
       (!tagFilter || g.tag === tagFilter) &&
       (!s || g.name.includes(s) || (digits.length > 2 && normalizePhone(g.phone).includes(normalizePhone(digits) || digits))),
     );
@@ -100,11 +111,11 @@ export default function GuestsPage() {
           </div>
 
           <div className="chip-row">
-            {(['all', ...STATUS_ORDER] as Filter[]).map((k) => (
-              <button key={k} className={`chip ${filter === k ? 'on' : ''}`} onClick={() => setFilter(k)}>
-                {k !== 'all' && <i className="dot" style={{ background: STATUS_META[k].color }} />}
-                {k === 'all' ? 'הכול' : STATUS_META[k].label}
-                <span className="count">{counts[k]}</span>
+            {CHIPS.map((c) => (
+              <button key={c.key} className={`chip ${filter === c.key ? 'on' : ''}`} onClick={() => setFilter(c.key)}>
+                {c.color && <i className="dot" style={{ background: c.color, boxShadow: filter === c.key ? '0 0 0 1.5px #fff' : undefined }} />}
+                {c.label}
+                <span className="count">{counts[c.key]}</span>
               </button>
             ))}
             {tags.map((t) => <button key={t} className={`chip ${tagFilter === t ? 'on' : ''}`} onClick={() => setTagFilter(tagFilter === t ? '' : t)}>#{t}</button>)}

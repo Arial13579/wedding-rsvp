@@ -86,4 +86,5 @@ export const STATUS_META: Record<Status, { label: string; short: string; color: 
   pending: { label: 'טרם ענו', short: 'טרם ענה', color: 'var(--pending)', ink: 'var(--pending-ink)' },
 };
 
-export const STATUS_ORDER: Status[] = ['yes', 'maybe', 'no', 'pending'];
+// Coming → not known yet → not coming, so bars read green, gray, red
+export const STATUS_ORDER: Status[] = ['yes', 'maybe', 'pending', 'no'];

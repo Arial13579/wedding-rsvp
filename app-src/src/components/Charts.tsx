@@ -53,10 +53,21 @@ export function Legend({ slices }: { slices: Slice[] }) {
 
 export interface StackRow { label: string; counts: Record<Status, number> }
 
+export function StatusLegend() {
+  return (
+    <div className="row wrap" style={{ gap: 14, fontSize: 13, color: 'var(--muted)' }}>
+      {STATUS_ORDER.map((k) => (
+        <span key={k} className="row" style={{ gap: 5 }}><i className="dot" style={{ background: STATUS_META[k].color }} />{STATUS_META[k].label}</span>
+      ))}
+    </div>
+  );
+}
+
 export function StackedBars({ rows }: { rows: StackRow[] }) {
   const max = Math.max(1, ...rows.map((r) => STATUS_ORDER.reduce((s, k) => s + r.counts[k], 0)));
   return (
     <div className="stack" style={{ gap: 14 }}>
+      <StatusLegend />
       {rows.map((r) => {
         const total = STATUS_ORDER.reduce((s, k) => s + r.counts[k], 0);
         return (

@@ -26,10 +26,12 @@
   --accent-grad: linear-gradient(180deg, #3cc0d6 0%, #2aa6bd 100%);
 
   /* System status colors + accessible darker variants for text */
-  --yes: #34c759;   --yes-ink: #248a3d;
-  --maybe: #ff9500; --maybe-ink: #c93400;
-  --no: #ff3b30;    --no-ink: #d70015;
-  --pending: #8e8e93; --pending-ink: #6c6c70;
+  /* Answers: green = coming, red = not coming, gray = not known yet */
+  --yes: #34c759;     --yes-ink: #1f7a36;
+  --no: #ff3b30;      --no-ink: #c41a12;
+  --maybe: #8e8e93;   --maybe-ink: #48484a;  /* unsure: gray */
+  --pending: #c7c7cc; --pending-ink: #636366; /* no answer yet: light gray */
+  --warn-ink: #b25000; /* warnings (not an answer color) */
 
   --radius: 14px;
   --radius-sm: 10px;
