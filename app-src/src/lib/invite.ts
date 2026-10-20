@@ -1,9 +1,9 @@
 'use client';
 
-import { fillTemplate, longDate } from './format';
+import { fillTemplate, longDate, wazeLink } from './format';
 import { formatPhone, normalizePhone } from './phone';
 import { BASE } from './config';
-import type { EventSettings, Guest } from './types';
+import { DIET_LABEL, type EventSettings, type Guest } from './types';
 
 export function guestLink(id: string): string {
   return `${window.location.origin}${BASE}/guest.html?id=${encodeURIComponent(id)}`;
@@ -18,6 +18,7 @@ export function buildMessage(template: string, s: EventSettings, g: Guest): stri
     date,
     venue: s.venueName,
     link: guestLink(g.id),
+    waze: wazeLink(s),
   });
 }
 
@@ -64,9 +65,13 @@ export async function shareInvitation(text: string, imageSrc: string): Promise<b
 
 export function guestsToCsv(guests: Guest[]): string {
   const STATUS: Record<string, string> = { yes: 'מגיע', maybe: 'מתלבט', no: 'לא מגיע', pending: 'טרם ענה' };
-  const rows = [['שם', 'טלפון', 'קבוצה', 'סטטוס', 'מבוגרים', 'ילדים', 'נשלח', 'הוסף ע"י', 'הערה', 'קישור אישי']];
+  const rows = [['שם', 'טלפון', 'קבוצה', 'סטטוס', 'מבוגרים', 'ילדים', 'שולחן', 'מנה', 'הגיעו', 'מתנה', 'הודעות שנשלחו', 'ברכה', 'הוסף ע"י', 'הערה', 'קישור אישי']];
   for (const g of guests) {
-    rows.push([g.name, formatPhone(g.phone), g.tag, STATUS[g.status], String(g.adults), String(g.kids), String(g.sentCount), g.addedByName, g.note, guestLink(g.id)]);
+    rows.push([
+      g.name, formatPhone(g.phone), g.tag, STATUS[g.status], String(g.adults), String(g.kids), g.table,
+      g.diet ? DIET_LABEL[g.diet as keyof typeof DIET_LABEL] : '', g.arrived ? 'כן' : '', g.gift ? String(g.gift) : '',
+      String(g.sentCount), g.message, g.addedByName, g.note, guestLink(g.id),
+    ]);
   }
-  return '﻿' + rows.map((r) => r.map((c) => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  return '\uFEFF' + rows.map((r) => r.map((c) => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
 }

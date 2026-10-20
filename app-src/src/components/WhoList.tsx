@@ -30,7 +30,7 @@ export function WhoList({ guests }: { guests: Guest[] }) {
       </div>
       <div className="segmented" style={{ marginBottom: 8 }}>
         {STATUS_ORDER.map((s) => (
-          <button key={s} className={tab === s ? 'on' : ''} onClick={() => { setTab(s); setAll(false); }} style={tab === s ? { color: STATUS_META[s].color } : undefined}>
+          <button key={s} className={tab === s ? 'on' : ''} onClick={() => { setTab(s); setAll(false); }} style={tab === s ? { color: STATUS_META[s].ink } : undefined}>
             {STATUS_META[s].label} {groups[s].length}
           </button>
         ))}
@@ -50,7 +50,7 @@ export function WhoList({ guests }: { guests: Guest[] }) {
               </div>
               {tab === 'yes' && (
                 <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--yes)' }}>{g.adults + g.kids}</div>
+                  <div className="num" style={{ fontWeight: 700, fontSize: 20, color: 'var(--yes-ink)' }}>{g.adults + g.kids}</div>
                   <div className="faint" style={{ fontSize: 11 }}>{g.adults} מב׳{g.kids ? ` · ${g.kids} יל׳` : ''}</div>
                 </div>
               )}

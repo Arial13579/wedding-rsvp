@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/components/AuthGate';
 import { IconChevron, IconLink, IconShare, IconWhatsApp } from '@/components/Icons';
-import { useToast } from '@/components/ui';
+import { Group, useToast } from '@/components/ui';
 import { createShareLink, setCollaboratorActive, setShareLinkActive, useTeam } from '@/lib/data';
 import { relativeTime } from '@/lib/format';
 import { BASE } from '@/lib/config';
@@ -39,64 +39,52 @@ export default function TeamPage() {
   }
 
   return (
-    <div className="stack" style={{ gap: 14 }}>
-      <div className="row">
-        <a href="#settings" className="icon-btn" aria-label="חזרה"><IconChevron style={{ transform: 'scaleX(-1)' }} /></a>
-        <div className="grow">
-          <div className="page-title" style={{ fontSize: 22 }}>שותפים והרשאות</div>
-          <div className="page-desc">מי שמקבל קישור יכול להתחבר, להוסיף את אנשי הקשר שלו ולשלוח להם הזמנות.</div>
-        </div>
+    <div className="stack" style={{ gap: 24 }}>
+      <div>
+        <a href="#settings" className="btn btn-ghost" style={{ paddingInline: 0 }}><IconChevron width={20} height={20} style={{ transform: 'scaleX(-1)' }} /> הגדרות</a>
+        <div className="page-title">שותפים</div>
+        <div className="page-desc">מי שמקבל קישור מתחבר עם Google, מוסיף את אנשי הקשר שלו ושולח להם הזמנות.</div>
       </div>
 
-      <div className="card stack hero-stat">
-        <div className="card-title" style={{ marginBottom: 0 }}>קישור הרשאה חדש</div>
-        <input className="input" placeholder="למי הקישור? (למשל: הכלה, אמא)" value={label} onChange={(e) => setLabel(e.target.value)} />
-        <button className="btn btn-primary" disabled={busy} onClick={create}><IconShare width={18} height={18} /> יצירה ושליחה</button>
-        <div className="hint">השותף רואה ומנהל רק את המוזמנים שהוא עצמו הוסיף. אתה רואה את כולם. אפשר לבטל גישה בכל רגע.</div>
-      </div>
+      <Group header="קישור חדש" footer="שותף רואה ומנהל רק את המוזמנים שהוא הוסיף. את/ה רואה את כולם, ואפשר לבטל גישה בכל רגע.">
+        <label className="cell"><input className="input" style={{ textAlign: 'start' }} placeholder="למי הקישור? למשל: מירב, אמא" value={label} onChange={(e) => setLabel(e.target.value)} /></label>
+        <button className="cell" style={{ justifyContent: 'center', color: 'var(--accent-ink)', fontWeight: 600 }} disabled={busy} onClick={create}><IconShare width={18} height={18} /> יצירה ושליחה</button>
+      </Group>
 
-      <div className="card">
-        <div className="card-title">שותפים <span className="card-sub">{collabs.filter((c) => c.active).length} פעילים</span></div>
-        {collabs.length === 0 ? <div className="empty" style={{ padding: 14 }}>עדיין אף אחד לא הצטרף</div> : (
-          <div className="list">
-            {collabs.map((c) => (
-              <div key={c.id} className="list-item">
-                <div className="li-avatar">{c.name[0] || '?'}</div>
-                <div className="grow">
-                  <div className="li-title">{c.name}</div>
-                  <div className="li-sub"><span dir="ltr">{c.email}</span>{c.joinedAt && <span>· הצטרף {relativeTime(c.joinedAt)}</span>}</div>
-                </div>
-                <button className={`btn btn-sm ${c.active ? 'btn-danger' : ''}`} onClick={() => setCollaboratorActive(c.id, !c.active)}>
-                  {c.active ? 'ביטול גישה' : 'החזרת גישה'}
-                </button>
-              </div>
-            ))}
+      <Group header={`שותפים · ${collabs.filter((c) => c.active).length} פעילים`}>
+        {collabs.length === 0 ? <div className="cell"><span className="grow muted center">עדיין אף אחד לא הצטרף</span></div> : collabs.map((c) => (
+          <div key={c.id} className="cell">
+            <div className="li-avatar">{c.name[0] || '?'}</div>
+            <div className="grow">
+              <div className="li-title">{c.name}</div>
+              <div className="li-sub"><span dir="ltr">{c.email}</span></div>
+            </div>
+            <button className={`btn btn-sm ${c.active ? 'btn-danger' : 'btn-tinted'}`} onClick={() => setCollaboratorActive(c.id, !c.active)}>
+              {c.active ? 'ביטול גישה' : 'החזרה'}
+            </button>
           </div>
-        )}
-      </div>
+        ))}
+      </Group>
 
-      <div className="card">
-        <div className="card-title">קישורים שנוצרו</div>
-        {links.length === 0 ? <div className="empty" style={{ padding: 14 }}>אין קישורים</div> : (
-          <div className="list">
-            {links.map((l) => (
-              <div key={l.id} className="list-item" style={{ opacity: l.active ? 1 : 0.5 }}>
-                <div className="grow">
-                  <div className="li-title">{l.label}</div>
-                  <div className="li-sub">{l.active ? 'פעיל' : 'מבוטל'}{l.createdAt && ` · ${relativeTime(l.createdAt)}`}</div>
-                </div>
-                {l.active && (
-                  <>
-                    <a className="icon-btn" href={`https://wa.me/?text=${encodeURIComponent(message(l.id))}`} target="_blank" rel="noreferrer" aria-label="וואטסאפ"><IconWhatsApp width={18} height={18} /></a>
-                    <button className="icon-btn" onClick={async () => { await navigator.clipboard.writeText(url(l.id)); toast('הועתק'); }} aria-label="העתקה"><IconLink width={18} height={18} /></button>
-                  </>
-                )}
-                <button className="btn btn-sm btn-ghost" onClick={() => setShareLinkActive(l.id, !l.active)}>{l.active ? 'ביטול' : 'הפעלה'}</button>
+      {links.length > 0 && (
+        <Group header="קישורים שנוצרו">
+          {links.map((l) => (
+            <div key={l.id} className="cell" style={{ opacity: l.active ? 1 : 0.5 }}>
+              <div className="grow">
+                <div className="li-title">{l.label}</div>
+                <div className="li-sub">{l.active ? 'פעיל' : 'מבוטל'}{l.createdAt && ` · ${relativeTime(l.createdAt)}`}</div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              {l.active && (
+                <>
+                  <a className="icon-btn" href={`https://wa.me/?text=${encodeURIComponent(message(l.id))}`} target="_blank" rel="noreferrer" aria-label="שליחה בוואטסאפ"><IconWhatsApp width={17} height={17} /></a>
+                  <button className="icon-btn" onClick={async () => { await navigator.clipboard.writeText(url(l.id)); toast('הקישור הועתק'); }} aria-label="העתקה"><IconLink width={17} height={17} /></button>
+                </>
+              )}
+              <button className="btn btn-sm btn-ghost" onClick={() => setShareLinkActive(l.id, !l.active)}>{l.active ? 'ביטול' : 'הפעלה'}</button>
+            </div>
+          ))}
+        </Group>
+      )}
     </div>
   );
 }

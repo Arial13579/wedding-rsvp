@@ -6,12 +6,13 @@ import { useAuth } from '@/components/AuthGate';
 import { ContactImport } from '@/components/ContactImport';
 import { GuestEditor } from '@/components/GuestEditor';
 import { IconContacts, IconDownload, IconEdit, IconLink, IconPlus, IconSearch, IconTrash, IconWhatsApp } from '@/components/Icons';
-import { Initials, Sheet, Spinner, StatusBadge, useToast } from '@/components/ui';
-import { deleteGuests, markSent } from '@/lib/data';
+import { Chevron, Group, Initials, Sheet, Spinner, StatusBadge, Switch, useToast } from '@/components/ui';
+import { deleteGuests, markSent, updateGuest } from '@/lib/data';
 import { buildMessage, guestLink, guestsToCsv, whatsappUrl } from '@/lib/invite';
 import { formatPhone, normalizePhone } from '@/lib/phone';
-import { relativeTime } from '@/lib/format';
-import { STATUS_META, STATUS_ORDER, type Guest, type Status } from '@/lib/types';
+import { relativeTime, shortDate } from '@/lib/format';
+import { nextReminderAt } from '@/lib/reminders';
+import { DIET_LABEL, STATUS_META, STATUS_ORDER, type Guest, type Status } from '@/lib/types';
 
 type Filter = Status | 'all';
 
@@ -20,15 +21,17 @@ export default function GuestsPage() {
   const { viewer } = useAuth();
   const toast = useToast();
   const { params } = useRoute();
+  const [view, setView] = useState<'list' | 'tables'>(params.get('view') === 'tables' ? 'tables' : 'list');
   const [filter, setFilter] = useState<Filter>((params.get('status') as Filter) || 'all');
   const [tagFilter, setTagFilter] = useState('');
   const [q, setQ] = useState('');
   const [importOpen, setImportOpen] = useState(false);
   const [editor, setEditor] = useState<{ open: boolean; guest: Guest | null }>({ open: false, guest: null });
-  const [actions, setActions] = useState<Guest | null>(null);
+  const [actionsId, setActionsId] = useState<string | null>(null);
 
   const tags = useMemo(() => [...new Set((guests || []).map((g) => g.tag).filter(Boolean))].sort(), [guests]);
   const phones = useMemo(() => new Set((guests || []).map((g) => normalizePhone(g.phone)).filter(Boolean)), [guests]);
+  const actions = (guests || []).find((g) => g.id === actionsId) || null;
 
   const counts = useMemo(() => {
     const c: Record<Filter, number> = { all: 0, yes: 0, maybe: 0, no: 0, pending: 0 };
@@ -42,125 +45,193 @@ export default function GuestsPage() {
     return (guests || []).filter((g) =>
       (filter === 'all' || g.status === filter) &&
       (!tagFilter || g.tag === tagFilter) &&
-      (!s || g.name.includes(s) || (digits.length > 2 && (g.phone.includes(digits) || formatPhone(g.phone).replace(/\D/g, '').includes(digits)))),
+      (!s || g.name.includes(s) || (digits.length > 2 && normalizePhone(g.phone).includes(normalizePhone(digits) || digits))),
     );
   }, [guests, filter, tagFilter, q]);
+
+  const tables = useMemo(() => {
+    const map = new Map<string, Guest[]>();
+    const unseated: Guest[] = [];
+    for (const g of guests || []) {
+      if (g.status !== 'yes') continue;
+      if (!g.table) { unseated.push(g); continue; }
+      if (!map.has(g.table)) map.set(g.table, []);
+      map.get(g.table)!.push(g);
+    }
+    const sorted = [...map.entries()].sort((a, b) => a[0].localeCompare(b[0], 'he', { numeric: true }));
+    return { sorted, unseated };
+  }, [guests]);
 
   if (!guests || !settings) return <div className="fullscreen-center" style={{ minHeight: '50vh' }}><Spinner /></div>;
 
   function exportCsv() {
-    const blob = new Blob([guestsToCsv(list)], { type: 'text/csv;charset=utf-8' });
+    const blob = new Blob([guestsToCsv(view === 'tables' ? guests!.filter((g) => g.status === 'yes') : list)], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = 'אישורי-הגעה.csv';
+    a.download = view === 'tables' ? 'הושבה.csv' : 'מוזמנים.csv';
     a.click();
   }
 
+  const people = (gs: Guest[]) => gs.reduce((s, g) => s + Math.max(1, g.adults + g.kids), 0);
+
   return (
-    <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head row wrap" style={{ marginBottom: 0 }}>
+    <div className="stack" style={{ gap: 16 }}>
+      <div className="page-head row" style={{ marginBottom: 0, alignItems: 'flex-end' }}>
         <div className="grow">
           <div className="page-title">מוזמנים</div>
           <div className="page-desc">{guests.length} הזמנות{!viewer.isOwner && ' שהוספת'}</div>
         </div>
-        <button className="icon-btn" onClick={exportCsv} aria-label="ייצוא לאקסל"><IconDownload width={18} height={18} /></button>
+        <button className="icon-btn" onClick={exportCsv} aria-label="ייצוא לאקסל"><IconDownload width={17} height={17} /></button>
+        <button className="icon-btn" onClick={() => setEditor({ open: true, guest: null })} aria-label="הוספה ידנית"><IconPlus width={19} height={19} /></button>
       </div>
 
-      <div className="grid-2">
-        <button className="btn btn-primary" onClick={() => setImportOpen(true)}><IconContacts width={19} height={19} /> מאנשי הקשר</button>
-        <button className="btn" onClick={() => setEditor({ open: true, guest: null })}><IconPlus width={19} height={19} /> הוספה ידנית</button>
+      <div className="segmented">
+        <button className={view === 'list' ? 'on' : ''} onClick={() => setView('list')}>רשימה</button>
+        <button className={view === 'tables' ? 'on' : ''} onClick={() => setView('tables')}>שולחנות</button>
       </div>
 
-      <div className="row" style={{ position: 'relative' }}>
-        <IconSearch width={18} height={18} style={{ position: 'absolute', insetInlineStart: 14, color: 'var(--faint)' }} />
-        <input className="input" style={{ paddingInlineStart: 42 }} placeholder="חיפוש לפי שם או טלפון" value={q} onChange={(e) => setQ(e.target.value)} />
-      </div>
+      {view === 'list' ? (
+        <>
+          <button className="btn btn-primary btn-lg btn-block" onClick={() => setImportOpen(true)}><IconContacts width={20} height={20} /> הוספה מאנשי הקשר</button>
 
-      <div className="chip-row">
-        {(['all', ...STATUS_ORDER] as Filter[]).map((k) => (
-          <button key={k} className={`chip ${filter === k ? 'on' : ''}`} onClick={() => setFilter(k)}>
-            {k !== 'all' && <i className="dot" style={{ background: STATUS_META[k].color }} />}
-            {k === 'all' ? 'הכול' : STATUS_META[k].label}
-            <span className="count">{counts[k]}</span>
-          </button>
-        ))}
-      </div>
-      {tags.length > 0 && (
-        <div className="chip-row">
-          <button className={`chip ${!tagFilter ? 'on' : ''}`} onClick={() => setTagFilter('')}>כל הקבוצות</button>
-          {tags.map((t) => <button key={t} className={`chip ${tagFilter === t ? 'on' : ''}`} onClick={() => setTagFilter(t)}>{t}</button>)}
-        </div>
-      )}
-
-      {error && <div className="card" style={{ color: 'var(--no)' }}>{error}</div>}
-
-      <div className="card" style={{ padding: '4px 14px' }}>
-        {list.length === 0 ? (
-          <div className="empty">
-            <div className="empty-icon">👥</div>
-            {guests.length === 0 ? 'עדיין אין מוזמנים. התחילו בייבוא מאנשי הקשר.' : 'לא נמצאו מוזמנים בסינון הזה'}
+          <div className="search">
+            <IconSearch />
+            <input className="input" type="search" placeholder="חיפוש" value={q} onChange={(e) => setQ(e.target.value)} aria-label="חיפוש לפי שם או טלפון" />
           </div>
-        ) : (
-          <div className="list">
-            {list.map((g) => (
-              <button key={g.id} className="list-item" style={{ textAlign: 'right', width: '100%' }} onClick={() => setActions(g)}>
-                <Initials name={g.name} />
-                <div className="grow">
-                  <div className="li-title">{g.name}</div>
-                  <div className="li-sub">
-                    {g.phone && <span dir="ltr">{formatPhone(g.phone)}</span>}
-                    {g.tag && <span>· {g.tag}</span>}
-                    {g.status === 'yes' && <span style={{ color: 'var(--yes)' }}>· {g.adults} מבוגרים{g.kids ? `, ${g.kids} ילדים` : ''}</span>}
-                    {viewer.isOwner && g.addedByName && g.addedByUid !== viewer.uid && <span>· של {g.addedByName}</span>}
-                  </div>
-                </div>
-                <div className="stack" style={{ gap: 4, alignItems: 'flex-end' }}>
-                  <StatusBadge status={g.status} />
-                  <span className="faint" style={{ fontSize: 11 }}>{g.sentCount ? `נשלח ×${g.sentCount}` : 'לא נשלח'}</span>
-                </div>
+
+          <div className="chip-row">
+            {(['all', ...STATUS_ORDER] as Filter[]).map((k) => (
+              <button key={k} className={`chip ${filter === k ? 'on' : ''}`} onClick={() => setFilter(k)}>
+                {k !== 'all' && <i className="dot" style={{ background: STATUS_META[k].color }} />}
+                {k === 'all' ? 'הכול' : STATUS_META[k].label}
+                <span className="count">{counts[k]}</span>
               </button>
             ))}
+            {tags.map((t) => <button key={t} className={`chip ${tagFilter === t ? 'on' : ''}`} onClick={() => setTagFilter(tagFilter === t ? '' : t)}>#{t}</button>)}
           </div>
-        )}
-      </div>
+
+          {error && <div className="card" style={{ color: 'var(--no-ink)' }}>{error}</div>}
+
+          {list.length === 0 ? (
+            <div className="empty">
+              <div className="empty-icon">👥</div>
+              {guests.length === 0 ? 'עדיין אין מוזמנים. מוסיפים מאנשי הקשר או ידנית.' : 'לא נמצאו מוזמנים'}
+            </div>
+          ) : (
+            <div className="group">
+              {list.map((g) => (
+                <button key={g.id} className="cell" onClick={() => setActionsId(g.id)}>
+                  <Initials name={g.name} />
+                  <span className="grow" style={{ minWidth: 0 }}>
+                    <span className="li-title" style={{ display: 'block' }}>{g.name}</span>
+                    <span className="li-sub">
+                      {g.status === 'yes'
+                        ? <span>{g.adults + g.kids} אורחים{g.table && ` · שולחן ${g.table}`}</span>
+                        : <span>{g.sentCount ? `נשלח ${relativeTime(g.lastSentAt)}` : 'לא נשלח'}</span>}
+                      {g.tag && <span>· {g.tag}</span>}
+                    </span>
+                  </span>
+                  <StatusBadge status={g.status} />
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          {tables.unseated.length > 0 && (
+            <Group header={`ממתינים להושבה · ${people(tables.unseated)} אורחים`} footer="לחצו על אורח כדי לשבץ אותו לשולחן.">
+              {tables.unseated.map((g) => (
+                <button key={g.id} className="cell" onClick={() => setActionsId(g.id)}>
+                  <span className="grow">{g.name}</span>
+                  <span className="cell-value num">{g.adults + g.kids}</span>
+                  <Chevron />
+                </button>
+              ))}
+            </Group>
+          )}
+          {tables.sorted.length === 0 && tables.unseated.length === 0 && (
+            <div className="empty"><div className="empty-icon">🍽️</div>ההושבה תופיע כאן אחרי שאורחים יאשרו הגעה.</div>
+          )}
+          {tables.sorted.map(([table, gs]) => (
+            <Group key={table} header={<span style={{ display: 'flex', justifyContent: 'space-between' }}><span>שולחן {table}</span><span className="num">{people(gs)} אורחים</span></span>}>
+              {gs.map((g) => (
+                <button key={g.id} className="cell" onClick={() => setActionsId(g.id)}>
+                  <span className="grow">{g.name}{g.diet && <span className="faint"> · {DIET_LABEL[g.diet as keyof typeof DIET_LABEL]}</span>}</span>
+                  <span className="cell-value num">{g.adults + g.kids}</span>
+                </button>
+              ))}
+            </Group>
+          ))}
+        </>
+      )}
 
       <ContactImport open={importOpen} onClose={() => setImportOpen(false)} existingPhones={phones} tags={tags} />
       <GuestEditor open={editor.open} guest={editor.guest} tags={tags} onClose={() => setEditor({ open: false, guest: null })} />
 
-      <Sheet open={!!actions} onClose={() => setActions(null)} title={actions?.name}>
-        {actions && (
-          <div className="stack">
-            <div className="row wrap muted" style={{ fontSize: 13.5 }}>
-              <StatusBadge status={actions.status} />
-              {actions.respondedAt && <span>ענה {relativeTime(actions.respondedAt)}</span>}
-              {actions.lastSentAt && <span>· נשלח {relativeTime(actions.lastSentAt)}</span>}
+      <Sheet open={!!actions} onClose={() => setActionsId(null)} title={actions?.name}>
+        {actions && (() => {
+          const next = nextReminderAt(actions, settings);
+          return (
+            <div className="stack" style={{ gap: 18 }}>
+              <div className="center stack" style={{ alignItems: 'center', gap: 6 }}>
+                <StatusBadge status={actions.status} />
+                <div className="muted" style={{ fontSize: 15 }} dir="ltr">{formatPhone(actions.phone)}</div>
+              </div>
+
+              <Group>
+                {actions.status === 'yes' && <div className="cell"><span className="grow">אורחים</span><span className="cell-value">{actions.adults} מבוגרים{actions.kids ? ` · ${actions.kids} ילדים` : ''}</span></div>}
+                {actions.diet && <div className="cell"><span className="grow">מנה</span><span className="cell-value">{DIET_LABEL[actions.diet as keyof typeof DIET_LABEL]}</span></div>}
+                <div className="cell"><span className="grow">הודעות שנשלחו</span><span className="cell-value num">{actions.sentCount}</span></div>
+                {actions.respondedAt && <div className="cell"><span className="grow">ענה</span><span className="cell-value">{relativeTime(actions.respondedAt)}</span></div>}
+                <div className="cell">
+                  <span className="grow">תזכורת הבאה</span>
+                  <span className="cell-value">{actions.status === 'no' ? 'לא תישלח (לא מגיע)' : actions.status === 'yes' ? 'אין צורך' : next ? (next <= Date.now() ? 'מוכנה לשליחה' : shortDate(new Date(next))) : actions.sentCount ? 'אין' : 'אחרי הסבב הראשון'}</span>
+                </div>
+                {actions.message && <div className="cell" style={{ alignItems: 'flex-start' }}><span className="grow" dir="auto" style={{ whiteSpace: 'pre-wrap', fontSize: 15 }}>💌 {actions.message}</span></div>}
+              </Group>
+
+              {actions.status === 'yes' && (
+                <Group header="יום האירוע">
+                  <label className="cell"><span className="grow">שולחן</span>
+                    <input className="input" style={{ maxWidth: 120 }} inputMode="numeric" defaultValue={actions.table} placeholder="מספר" key={actions.id + 'table'}
+                      onBlur={(e) => { if (e.target.value !== actions.table) updateGuest(actions.id, { table: e.target.value.trim() }).then(() => toast('נשמר')); }} />
+                  </label>
+                  <div className="cell"><span className="grow">הגיעו</span><Switch label="הגיעו לאירוע" checked={actions.arrived} onChange={(v) => updateGuest(actions.id, { arrived: v })} /></div>
+                  <label className="cell"><span className="grow">מתנה (₪)</span>
+                    <input className="input" style={{ maxWidth: 120 }} inputMode="numeric" defaultValue={actions.gift || ''} placeholder="0" key={actions.id + 'gift'}
+                      onBlur={(e) => { const n = Number(e.target.value.replace(/\D/g, '')) || 0; if (n !== actions.gift) updateGuest(actions.id, { gift: n }).then(() => toast('נשמר')); }} />
+                  </label>
+                </Group>
+              )}
+
+              <Group>
+                <a className="cell indent-icon" href={whatsappUrl(actions.phone, buildMessage(actions.sentCount ? settings.reminderTemplate : settings.inviteTemplate, settings, actions))} target="_blank" rel="noreferrer"
+                  onClick={() => { markSent(actions.id).catch(() => {}); }}>
+                  <span className="cell-icon" style={{ background: '#25d366' }}><IconWhatsApp /></span><span className="grow">שליחה בוואטסאפ</span><Chevron />
+                </a>
+                <button className="cell indent-icon" onClick={async () => { await navigator.clipboard.writeText(guestLink(actions.id)); toast('הקישור הועתק'); }}>
+                  <span className="cell-icon" style={{ background: '#30b0c7' }}><IconLink /></span><span className="grow">העתקת הקישור האישי</span>
+                </button>
+                <a className="cell indent-icon" href={guestLink(actions.id)} target="_blank" rel="noreferrer">
+                  <span className="cell-icon" style={{ background: '#5856d6' }}>👁</span><span className="grow">הדף שהאורח רואה</span><Chevron />
+                </a>
+                <button className="cell indent-icon" onClick={() => { setEditor({ open: true, guest: actions }); setActionsId(null); }}>
+                  <span className="cell-icon" style={{ background: '#8e8e93' }}><IconEdit /></span><span className="grow">עריכה ועדכון תשובה</span><Chevron />
+                </button>
+              </Group>
+
+              <Group>
+                <button className="cell" style={{ justifyContent: 'center', color: 'var(--no-ink)' }} onClick={async () => {
+                  if (!confirm(`למחוק את ${actions.name}?`)) return;
+                  await deleteGuests([actions.id]); setActionsId(null); toast('נמחק');
+                }}>
+                  <IconTrash width={18} height={18} /> מחיקת מוזמן
+                </button>
+              </Group>
             </div>
-            {actions.note && <div className="card" style={{ background: 'var(--bg-2)', fontSize: 14 }}>{actions.note}</div>}
-            <a
-              className="btn btn-wa btn-block"
-              href={whatsappUrl(actions.phone, buildMessage(actions.sentCount ? settings.reminderTemplate : settings.inviteTemplate, settings, actions))}
-              target="_blank" rel="noreferrer"
-              onClick={() => { markSent(actions.id).catch(() => {}); setActions(null); }}
-            >
-              <IconWhatsApp /> שליחה בוואטסאפ
-            </a>
-            <div className="grid-2">
-              <button className="btn" onClick={async () => { await navigator.clipboard.writeText(guestLink(actions.id)); toast('הקישור האישי הועתק'); }}>
-                <IconLink width={18} height={18} /> העתקת קישור
-              </button>
-              <button className="btn" onClick={() => { setEditor({ open: true, guest: actions }); setActions(null); }}>
-                <IconEdit width={18} height={18} /> עריכה
-              </button>
-            </div>
-            <a className="btn btn-ghost" href={guestLink(actions.id)} target="_blank" rel="noreferrer">צפייה בעמוד ההזמנה של האורח</a>
-            <button className="btn btn-danger" onClick={async () => {
-              if (!confirm(`למחוק את ${actions.name}?`)) return;
-              await deleteGuests([actions.id]); setActions(null); toast('נמחק');
-            }}>
-              <IconTrash width={18} height={18} /> מחיקה
-            </button>
-          </div>
-        )}
+          );
+        })()}
       </Sheet>
     </div>
   );

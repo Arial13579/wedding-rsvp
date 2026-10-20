@@ -6,6 +6,8 @@ import { IconChart, IconLogout, IconSend, IconSettings, IconUsers } from './Icon
 import { ToastProvider } from './ui';
 import { useGuests, useInvitationImage, useSettings } from '@/lib/data';
 import { invitationSrc } from '@/lib/invite';
+import { BASE } from '@/lib/config';
+import { dueReminders } from '@/lib/reminders';
 import type { EventSettings, Guest } from '@/lib/types';
 import Dashboard from '@/views/Dashboard';
 import Guests from '@/views/Guests';
@@ -39,8 +41,10 @@ function parseHash(): Route {
 const RouteCtx = createContext<Route>({ tab: 'dashboard', params: new URLSearchParams() });
 export const useRoute = () => useContext(RouteCtx);
 
+const TITLES: Record<Tab, string> = { dashboard: 'סיכום', guests: 'מוזמנים', send: 'שליחה', settings: 'הגדרות', team: 'שותפים' };
+
 const TABS: { tab: Tab; href: string; label: string; Icon: typeof IconChart }[] = [
-  { tab: 'dashboard', href: '#', label: 'לוח בקרה', Icon: IconChart },
+  { tab: 'dashboard', href: '#', label: 'סיכום', Icon: IconChart },
   { tab: 'guests', href: '#guests', label: 'מוזמנים', Icon: IconUsers },
   { tab: 'send', href: '#send', label: 'שליחה', Icon: IconSend },
   { tab: 'settings', href: '#settings', label: 'הגדרות', Icon: IconSettings },
@@ -54,6 +58,14 @@ export function AdminShell() {
   const settings = useSettings();
   const uploaded = useInvitationImage(settings?.invitationVersion || 0);
   const [route, setRoute] = useState<Route>(parseHash);
+
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 36);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+  const due = guests && settings ? dueReminders(guests, settings).length : 0;
 
   useEffect(() => {
     const onHash = () => { setRoute(parseHash()); window.scrollTo({ top: 0 }); };
@@ -70,19 +82,14 @@ export function AdminShell() {
       <RouteCtx.Provider value={route}>
         <ToastProvider>
           <div className="shell">
-            <header className="topbar">
-              <div className="brand grow">
-                <div className="brand-mark" aria-hidden>💍</div>
-                <div>
-                  <div className="brand-name">{settings?.coupleNames || 'החתונה שלנו'}</div>
-                  <div className="brand-sub">אישורי הגעה</div>
-                </div>
-              </div>
+            <header className={`topbar ${scrolled ? 'scrolled' : ''}`}>
+              <div className="brand-mark" aria-hidden><img src={`${BASE}/apple-touch-icon.png`} alt="" /></div>
+              <div className="topbar-title">{TITLES[route.tab]}</div>
               {!viewer.isOwner && <span className="badge" style={{ background: 'var(--accent-soft)', color: 'var(--accent-ink)' }}>שותף</span>}
               {user.photoURL
                 ? <img src={user.photoURL} alt="" className="avatar" referrerPolicy="no-referrer" />
                 : <div className="avatar">{viewer.name[0]}</div>}
-              <button className="icon-btn" onClick={logout} aria-label="התנתקות"><IconLogout width={18} height={18} /></button>
+              <button className="icon-btn" onClick={logout} aria-label="התנתקות"><IconLogout width={17} height={17} /></button>
             </header>
             <main className="page" key={route.tab}><View /></main>
             <nav className="tabbar" style={{ ['--tabs' as string]: TABS.length }}>
@@ -90,6 +97,7 @@ export function AdminShell() {
                 <a key={tab} href={href} className={`tab ${activeTab === tab ? 'active' : ''}`} aria-current={activeTab === tab ? 'page' : undefined}>
                   <Icon />
                   {label}
+                  {tab === 'send' && due > 0 && <span className="tab-badge" aria-label={`${due} תזכורות ממתינות`}>{due}</span>}
                 </a>
               ))}
             </nav>

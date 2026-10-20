@@ -1,4 +1,12 @@
 export type Status = 'pending' | 'yes' | 'maybe' | 'no';
+export type Diet = '' | 'veg' | 'vegan' | 'gf' | 'other';
+
+export const DIET_LABEL: Record<Exclude<Diet, ''>, string> = {
+  veg: 'צמחוני',
+  vegan: 'טבעוני',
+  gf: 'ללא גלוטן',
+  other: 'אחר',
+};
 
 export interface Guest {
   id: string;
@@ -15,6 +23,15 @@ export interface Guest {
   createdAt: number | null;
   lastSentAt: number | null;
   respondedAt: number | null;
+  /** Date the guest asked to be reminded (set when answering "maybe") */
+  remindOn: number | null;
+  diet: Diet;
+  /** Blessing the guest left for the couple */
+  message: string;
+  table: string;
+  gift: number;
+  /** The guest actually arrived (event-day check-in) */
+  arrived: boolean;
 }
 
 export interface EventSettings {
@@ -30,7 +47,12 @@ export interface EventSettings {
   inviteTemplate: string;
   reminderTemplate: string;
   thanksTemplate: string;
+  eveTemplate: string;
   invitationVersion: number;
+  /** Automatic reminder policy */
+  remindersOn: boolean;
+  reminderDays: number;
+  maxReminders: number;
 }
 
 export const DEFAULT_SETTINGS: EventSettings = {
@@ -49,7 +71,12 @@ export const DEFAULT_SETTINGS: EventSettings = {
     'היי {name}, תזכורת קטנה 🙏\nנשמח לדעת אם תגיעו לחתונה של {couple} ב־{date}.\nלאישור הגעה בלחיצה:\n{link}',
   thanksTemplate:
     'תודה רבה {name} שהגעתם לחגוג איתנו את החתונה של {couple} 🤍\nהיה לנו כל כך משמעותי שהייתם שם איתנו.',
+  eveTemplate:
+    'היי {name} 🥂\nמחכים לראותך מחר בחתונה של {couple} ב{venue}!\nניווט: {waze}',
   invitationVersion: 0,
+  remindersOn: true,
+  reminderDays: 7,
+  maxReminders: 3,
 };
 
 export const STATUS_META: Record<Status, { label: string; short: string; color: string; ink: string }> = {

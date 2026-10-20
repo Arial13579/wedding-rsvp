@@ -6,7 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useInvitationImage } from '@/lib/data';
 import { invitationSrc } from '@/lib/invite';
-import { DEFAULT_SETTINGS, type EventSettings, type Status } from '@/lib/types';
+import { DEFAULT_SETTINGS, type Diet, type EventSettings, type Status } from '@/lib/types';
 import { Spinner } from '@/components/ui';
 import { RsvpClient, type PublicGuest } from './RsvpClient';
 
@@ -29,6 +29,8 @@ function Loader() {
           status: (['yes', 'maybe', 'no'].includes(d.status) ? d.status : 'pending') as Status,
           adults: Number(d.adults) || 0,
           kids: Number(d.children ?? d.kids) || 0,
+          diet: (['veg', 'vegan', 'gf', 'other'].includes(d.diet) ? d.diet : '') as Diet,
+          message: typeof d.message === 'string' ? d.message : '',
         } : null,
         settings: { ...DEFAULT_SETTINGS, ...(s?.data() || {}) } as EventSettings,
       });

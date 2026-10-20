@@ -9,7 +9,8 @@
     "lint": "tsc --noEmit",
     "emulators": "npx firebase-tools emulators:start --only auth,firestore --project demo-wedding",
     "test:rules": "node tests/rules.test.mjs",
-    "publish": "node scripts/publish.mjs"
+    "publish": "node scripts/publish.mjs",
+    "test:reminders": "node --experimental-strip-types tests/reminders.test.mjs"
   },
   "dependencies": {
     "firebase": "12.19.0",

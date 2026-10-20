@@ -6,7 +6,7 @@ import { formatPhone } from '@/lib/phone';
 import { addGuests } from '@/lib/data';
 import { useAuth } from './AuthGate';
 import { IconCheck, IconContacts, IconFile, IconSearch } from './Icons';
-import { Sheet, useToast } from './ui';
+import { Chevron, Group, Sheet, useToast } from './ui';
 
 export function ContactImport({ open, onClose, existingPhones, tags }: { open: boolean; onClose: () => void; existingPhones: Set<string>; tags: string[] }) {
   const { viewer } = useAuth();
@@ -74,83 +74,67 @@ export function ContactImport({ open, onClose, existingPhones, tags }: { open: b
   }
 
   return (
-    <Sheet open={open} onClose={() => { reset(); onClose(); }} title="ייבוא מאנשי הקשר">
+    <Sheet open={open} onClose={() => { reset(); onClose(); }} title="אנשי קשר"
+      action={candidates ? { label: busy ? 'מוסיף…' : `הוספה (${selected.size})`, onClick: save, disabled: busy || selected.size === 0 } : undefined}>
       {!candidates ? (
-        <div className="stack">
-          <button className="card row" style={{ textAlign: 'right', gap: 14 }} onClick={fromDevice} disabled={!supported}>
-            <div className="brand-mark" style={{ width: 44, height: 44, flex: 'none' }}><IconContacts /></div>
-            <div className="grow">
-              <div style={{ fontWeight: 700 }}>בחירה מאנשי הקשר באייפון</div>
-              <div className="muted" style={{ fontSize: 13 }}>{supported ? 'בוחרים אנשי קשר ישירות מהטלפון' : 'צריך להפעיל פעם אחת בהגדרות Safari (הסבר למטה)'}</div>
-            </div>
-          </button>
-          <button className="card row" style={{ textAlign: 'right', gap: 14 }} onClick={() => fileRef.current?.click()}>
-            <div className="brand-mark" style={{ width: 44, height: 44, flex: 'none' }}><IconFile /></div>
-            <div className="grow">
-              <div style={{ fontWeight: 700 }}>ייבוא קובץ אנשי קשר (vCard)</div>
-              <div className="muted" style={{ fontSize: 13 }}>כל אנשי הקשר בבת אחת, ואז בוחרים את מי להזמין</div>
-            </div>
-          </button>
+        <div className="stack" style={{ gap: 22 }}>
+          <Group footer={supported ? 'בוחרים בדיוק את מי להזמין ישירות מאנשי הקשר.' : 'כדי לבחור ישירות מהטלפון צריך להפעיל פעם אחת אפשרות ב־Safari (הסבר למטה). בינתיים אפשר לייבא קובץ.'}>
+            <button className="cell indent-icon" onClick={fromDevice} disabled={!supported} style={supported ? undefined : { opacity: .45 }}>
+              <span className="cell-icon" style={{ background: '#30b0c7' }}><IconContacts /></span>
+              <span className="grow">בחירה מאנשי הקשר</span><Chevron />
+            </button>
+            <button className="cell indent-icon" onClick={() => fileRef.current?.click()}>
+              <span className="cell-icon" style={{ background: '#8e8e93' }}><IconFile /></span>
+              <span className="grow">ייבוא קובץ אנשי קשר (vCard)</span><Chevron />
+            </button>
+          </Group>
           <input ref={fileRef} type="file" accept=".vcf,text/vcard,text/x-vcard" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) fromFile(f); e.target.value = ''; }} />
-          {error && <div style={{ color: 'var(--no)', fontSize: 13 }}>{error}</div>}
-          <details className="card" style={{ background: 'var(--bg-2)' }}>
-            <summary style={{ fontWeight: 600, cursor: 'pointer' }}>איך מייצאים את כל אנשי הקשר מהאייפון?</summary>
-            <ol className="muted" style={{ paddingInlineStart: 20, marginTop: 10, lineHeight: 1.9, fontSize: 14 }}>
-              <li>פותחים את אפליקציית <b>אנשי קשר</b> ולוחצים על <b>רשימות</b> (למעלה משמאל).</li>
-              <li>לחיצה ארוכה על <b>כל אנשי הקשר</b> ← <b>ייצוא</b>.</li>
-              <li>בוחרים <b>שמירה בקבצים</b>, ואז כאן בוחרים את הקובץ שנשמר.</li>
-            </ol>
-          </details>
+          {error && <div style={{ color: 'var(--no-ink)', fontSize: 15, textAlign: 'center' }}>{error}</div>}
           {!supported && (
-            <details className="card" style={{ background: 'var(--bg-2)' }}>
-              <summary style={{ fontWeight: 600, cursor: 'pointer' }}>הפעלת בחירה ישירה מאנשי הקשר</summary>
-              <ol className="muted" style={{ paddingInlineStart: 20, marginTop: 10, lineHeight: 1.9, fontSize: 14 }}>
-                <li><b>הגדרות</b> ← <b>אפליקציות</b> ← <b>Safari</b> ← <b>מתקדם</b> ← <b>Feature Flags</b>.</li>
-                <li>מפעילים את <b>Contact Picker API</b>.</li>
-                <li>חוזרים לכאן ומרעננים את הדף.</li>
-              </ol>
-            </details>
+            <Group header="הפעלת בחירה ישירה באייפון">
+              <div className="cell"><span className="grow" style={{ fontSize: 15, lineHeight: 1.6 }}>הגדרות ← אפליקציות ← Safari ← מתקדם ← Feature Flags ← מפעילים את <b>Contact Picker API</b>, ואז מרעננים את הדף.</span></div>
+            </Group>
           )}
+          <Group header="ייצוא כל אנשי הקשר לקובץ">
+            <div className="cell"><span className="grow" style={{ fontSize: 15, lineHeight: 1.6 }}>אנשי קשר ← רשימות ← לחיצה ארוכה על <b>כל אנשי הקשר</b> ← ייצוא ← שמירה בקבצים. אחר כך בוחרים כאן את הקובץ, ומסמנים את מי להזמין.</span></div>
+          </Group>
         </div>
       ) : (
-        <div className="stack">
-          <div className="row" style={{ position: 'relative' }}>
-            <IconSearch width={18} height={18} style={{ position: 'absolute', insetInlineStart: 14, color: 'var(--faint)' }} />
-            <input className="input" style={{ paddingInlineStart: 42 }} placeholder="חיפוש שם או מספר" value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="stack" style={{ gap: 14 }}>
+          <div className="search">
+            <IconSearch />
+            <input className="input" type="search" placeholder="חיפוש" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           <div className="row">
-            <button className="btn btn-sm btn-ghost" onClick={toggleAll}>{allFilteredOn ? 'ביטול בחירה' : 'בחירת הכול'}</button>
-            <span className="grow muted" style={{ fontSize: 13 }}>נבחרו {selected.size} מתוך {candidates.length}</span>
+            <span className="grow muted" style={{ fontSize: 15 }}>נבחרו {selected.size} מתוך {candidates.length}</span>
+            <button className="btn btn-sm btn-tinted" onClick={toggleAll}>{allFilteredOn ? 'ביטול הבחירה' : 'בחירת הכול'}</button>
           </div>
-          <div className="list" style={{ maxHeight: '42dvh', overflowY: 'auto', margin: '0 -4px' }}>
+          <div className="group" style={{ maxHeight: '46dvh', overflowY: 'auto' }}>
             {filtered.map((c) => {
               const on = selected.has(c.key);
               const exists = existingPhones.has(c.phone);
               return (
-                <button key={c.key} className="list-item" style={{ textAlign: 'right', width: '100%' }} onClick={() => {
+                <button key={c.key} className="cell" aria-pressed={on} onClick={() => {
                   const next = new Set(selected); if (on) next.delete(c.key); else next.add(c.key); setSelected(next);
                 }}>
-                  <div className={`check ${on ? 'on' : ''}`}>{on && <IconCheck width={15} height={15} />}</div>
-                  <div className="grow">
-                    <div className="li-title">{c.name}</div>
-                    <div className="li-sub"><span dir="ltr">{formatPhone(c.phone)}</span>{exists && <span style={{ color: 'var(--maybe)' }}>כבר ברשימה</span>}</div>
-                  </div>
+                  <span className={`check ${on ? 'on' : ''}`}>{on && <IconCheck width={14} height={14} />}</span>
+                  <span className="grow">
+                    <span className="li-title" style={{ display: 'block' }}>{c.name}</span>
+                    <span className="li-sub"><span dir="ltr">{formatPhone(c.phone)}</span>{exists && <span style={{ color: 'var(--maybe-ink)' }}>· כבר ברשימה</span>}</span>
+                  </span>
                 </button>
               );
             })}
           </div>
-          <label className="field">
-            <span>קבוצה (לא חובה)</span>
-            <input className="input" list="tag-list" placeholder="למשל: משפחה, חברים מהצבא, עבודה" value={tag} onChange={(e) => setTag(e.target.value)} />
-            <datalist id="tag-list">{tags.map((t) => <option key={t} value={t} />)}</datalist>
-          </label>
-          {error && <div style={{ color: 'var(--no)', fontSize: 13 }}>{error}</div>}
-          <div className="row">
-            <button className="btn btn-ghost" onClick={reset}>חזרה</button>
-            <button className="btn btn-primary grow" disabled={busy || selected.size === 0} onClick={save}>
-              {busy ? 'מוסיף…' : `הוספת ${selected.size} מוזמנים`}
-            </button>
-          </div>
+          <Group>
+            <label className="cell"><span className="grow">קבוצה</span>
+              <input className="input" style={{ maxWidth: 200 }} list="tag-list" placeholder="ללא" value={tag} onChange={(e) => setTag(e.target.value)} />
+              <datalist id="tag-list">{tags.map((t) => <option key={t} value={t} />)}</datalist>
+            </label>
+          </Group>
+          {error && <div style={{ color: 'var(--no-ink)', fontSize: 15, textAlign: 'center' }}>{error}</div>}
+          <button className="btn btn-primary btn-lg btn-block" disabled={busy || selected.size === 0} onClick={save}>{busy ? 'מוסיף…' : `הוספת ${selected.size} מוזמנים`}</button>
+          <button className="btn btn-ghost" onClick={reset}>חזרה</button>
         </div>
       )}
     </Sheet>

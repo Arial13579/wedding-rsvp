@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAdminData } from '@/components/AdminShell';
 import { useAuth } from '@/components/AuthGate';
-import { IconChevron, IconImage, IconTeam } from '@/components/Icons';
-import { Spinner, useToast } from '@/components/ui';
-import { removeInvitationImage, saveInvitationImage, saveSettings } from '@/lib/data';
+import { IconImage, IconTeam } from '@/components/Icons';
+import { Chevron, Group, Sheet, Spinner, Stepper, Switch, useToast } from '@/components/ui';
+import { removeInvitationImage, resetEvent, saveInvitationImage, saveSettings } from '@/lib/data';
 import { compressInvitation } from '@/lib/image';
+import { guestsToCsv } from '@/lib/invite';
 import { DEFAULT_SETTINGS, type EventSettings } from '@/lib/types';
 
 /** ISO → value for <input type="datetime-local"> in local time */
@@ -17,54 +18,68 @@ function toLocalInput(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+type TemplateKey = 'inviteTemplate' | 'reminderTemplate' | 'eveTemplate' | 'thanksTemplate';
+const TEMPLATES: { key: TemplateKey; label: string; hint: string }[] = [
+  { key: 'inviteTemplate', label: 'הזמנה', hint: 'נשלחת בסבב הראשון' },
+  { key: 'reminderTemplate', label: 'תזכורת', hint: 'למי שלא ענה או מתלבט' },
+  { key: 'eveTemplate', label: 'יום לפני האירוע', hint: 'למי שאישר, עם ניווט' },
+  { key: 'thanksTemplate', label: 'תודה', hint: 'אחרי החתונה' },
+];
+
 export default function SettingsPage() {
-  const { settings, invitation, hasUploadedInvitation } = useAdminData();
+  const { settings, invitation, hasUploadedInvitation, guests } = useAdminData();
   const { viewer, user, logout } = useAuth();
   const toast = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<EventSettings | null>(null);
-  const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [editing, setEditing] = useState<TemplateKey | null>(null);
+  const [draft, setDraft] = useState('');
+  const [resetOpen, setResetOpen] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [resetting, setResetting] = useState('');
 
   useEffect(() => { if (settings && !form) setForm(settings); }, [settings, form]);
 
   if (!form || !settings) return <div className="fullscreen-center" style={{ minHeight: '50vh' }}><Spinner /></div>;
 
+  const account = (
+    <Group header="חשבון">
+      <div className="cell"><span className="grow">מחובר/ת</span><span className="cell-value" dir="ltr">{user.email}</span></div>
+      <button className="cell" style={{ justifyContent: 'center', color: 'var(--no-ink)' }} onClick={logout}>התנתקות</button>
+    </Group>
+  );
+
   if (!viewer.isOwner) {
     return (
-      <div className="stack">
-        <div className="page-title">הגדרות</div>
-        <div className="card stack">
-          <div className="muted">מחובר/ת כ־<b dir="ltr">{user.email}</b> (שותף/ה)</div>
-          <p className="muted" style={{ fontSize: 14 }}>פרטי האירוע ותמונת ההזמנה מנוהלים על ידי בעל האירוע. אפשר להוסיף מוזמנים ולשלוח להם הזמנות.</p>
-          <button className="btn btn-ghost" onClick={logout}>התנתקות</button>
-        </div>
+      <div className="stack" style={{ gap: 22 }}>
+        <div className="page-head"><div className="page-title">הגדרות</div></div>
+        <Group footer="פרטי האירוע ותמונת ההזמנה מנוהלים על ידי בעל האירוע. את/ה יכול/ה להוסיף מוזמנים ולשלוח להם הזמנות.">
+          <div className="cell"><span className="grow">הרשאה</span><span className="cell-value">שותף/ה</span></div>
+        </Group>
+        {account}
       </div>
     );
   }
 
-  const set = <K extends keyof EventSettings>(k: K, v: EventSettings[K]) => setForm({ ...form, [k]: v });
-
-  async function save() {
-    if (!form) return;
-    setBusy(true);
-    try {
-      const { invitationVersion: _ignored, ...rest } = form; // eslint-disable-line @typescript-eslint/no-unused-vars
-      await saveSettings(rest);
-      toast('ההגדרות נשמרו ✓');
-    } catch (e) {
-      toast((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
+  // Settings save immediately, like the iOS Settings app
+  async function commit(patch: Partial<EventSettings>) {
+    setForm((f) => (f ? { ...f, ...patch } : f));
+    try { await saveSettings(patch); } catch (e) { toast((e as Error).message); }
   }
+  const text = (k: keyof EventSettings, placeholder: string, extra?: React.InputHTMLAttributes<HTMLInputElement>) => (
+    <input
+      className="input" style={{ maxWidth: '62%' }} placeholder={placeholder} defaultValue={String(form[k] ?? '')} key={k + String(settings[k])}
+      onBlur={(e) => { if (e.target.value !== String(settings[k] ?? '')) commit({ [k]: e.target.value } as Partial<EventSettings>); }}
+      {...extra}
+    />
+  );
 
   async function upload(file: File) {
     setUploading(true);
     try {
-      const data = await compressInvitation(file);
-      await saveInvitationImage(data);
-      toast('ההזמנה הועלתה ✓');
+      await saveInvitationImage(await compressInvitation(file));
+      toast('ההזמנה עודכנה');
     } catch (e) {
       toast((e as Error).message);
     } finally {
@@ -72,67 +87,116 @@ export default function SettingsPage() {
     }
   }
 
+  function backup() {
+    const blob = new Blob([guestsToCsv(guests || [])], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'גיבוי-מוזמנים.csv';
+    a.click();
+  }
+
+  async function doReset() {
+    setResetting('מוחק…');
+    try {
+      const n = await resetEvent((done, total) => setResetting(`מוחק… ${done}/${total}`));
+      setResetOpen(false);
+      setConfirmText('');
+      setForm(null);
+      toast(`נמחקו ${n} רשומות. אירוע חדש מוכן`);
+    } catch (e) {
+      toast((e as Error).message);
+    } finally {
+      setResetting('');
+    }
+  }
+
   return (
-    <div className="stack" style={{ gap: 14 }}>
-      <div className="page-head" style={{ marginBottom: 0 }}>
-        <div className="page-title">הגדרות האירוע</div>
-        <div className="page-desc">כל מה שהאורחים רואים בדף ההזמנה</div>
-      </div>
+    <div className="stack" style={{ gap: 26 }}>
+      <div className="page-head" style={{ marginBottom: 0 }}><div className="page-title">הגדרות</div></div>
 
-      <a href="#team" className="card row" style={{ gap: 14 }}>
-        <div className="brand-mark" style={{ width: 42, height: 42, flex: 'none' }}><IconTeam /></div>
-        <div className="grow">
-          <div style={{ fontWeight: 700 }}>שותפים והרשאות</div>
-          <div className="muted" style={{ fontSize: 13 }}>שליחת קישור הרשאה למי שיוסיף ויזמין גם את אנשי הקשר שלו</div>
-        </div>
-        <IconChevron />
-      </a>
+      {/* Header card, like the Apple Account row */}
+      <button className="card row" style={{ gap: 14, padding: 12 }} onClick={() => fileRef.current?.click()}>
+        <img src={invitation} alt="" style={{ width: 64, height: 80, objectFit: 'cover', borderRadius: 10 }} />
+        <span className="grow">
+          <span style={{ display: 'block', fontSize: 20, fontWeight: 600 }}>{form.coupleNames}</span>
+          <span className="cell-sub">{uploading ? 'מעלה…' : 'לחצו להחלפת תמונת ההזמנה'}</span>
+        </span>
+        <Chevron />
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
+      {hasUploadedInvitation && <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'center', marginTop: -16 }} onClick={async () => { if (confirm('לחזור לתמונה המקורית של האתר?')) await removeInvitationImage(); }}><IconImage width={16} height={16} /> חזרה לתמונה המקורית</button>}
 
-      <div className="card stack">
-        <div className="card-title" style={{ marginBottom: 0 }}>תמונת ההזמנה</div>
-        <img src={invitation} alt="ההזמנה" style={{ borderRadius: 14, border: '1px solid var(--border)', maxHeight: 420, objectFit: 'contain', margin: '0 auto' }} />
-        <div className="hint">{hasUploadedInvitation ? 'מוצגת ההזמנה שהעלית.' : 'מוצגת תמונת ההזמנה של האתר. אפשר להעלות תמונה אחרת.'}</div>
-        <div className="row">
-          <button className="btn grow" disabled={uploading} onClick={() => fileRef.current?.click()}><IconImage width={18} height={18} /> {uploading ? 'מעלה…' : 'העלאת תמונה חדשה'}</button>
-          {hasUploadedInvitation && <button className="btn btn-danger" onClick={async () => { if (confirm('לחזור לתמונה המקורית של האתר?')) await removeInvitationImage(); }}>חזרה למקורית</button>}
-        </div>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
-      </div>
-
-      <div className="card stack">
-        <div className="card-title" style={{ marginBottom: 0 }}>פרטי האירוע</div>
-        <label className="field"><span>שמות בני הזוג</span><input className="input" value={form.coupleNames} onChange={(e) => set('coupleNames', e.target.value)} placeholder="אריאל & נועה" /></label>
-        <label className="field"><span>כותרת</span><input className="input" value={form.headline} onChange={(e) => set('headline', e.target.value)} placeholder="מתחתנים!" /></label>
-        <label className="field">
-          <span>תאריך ושעת האירוע (לספירה לאחור)</span>
-          <input className="input" type="datetime-local" value={toLocalInput(form.eventDate)} onChange={(e) => set('eventDate', e.target.value ? new Date(e.target.value).toISOString() : '')} />
+      <Group header="האירוע">
+        <label className="cell"><span className="grow">שמות</span>{text('coupleNames', 'אריאל & מירב')}</label>
+        <label className="cell"><span className="grow">כותרת</span>{text('headline', 'מתחתנים!')}</label>
+        <label className="cell"><span className="grow">תאריך ושעה</span>
+          <input className="input" style={{ maxWidth: '62%' }} type="datetime-local" defaultValue={toLocalInput(form.eventDate)} key={settings.eventDate}
+            onBlur={(e) => { const v = e.target.value ? new Date(e.target.value).toISOString() : ''; if (v !== settings.eventDate) commit({ eventDate: v }); }} />
         </label>
-        <div className="grid-2">
-          <label className="field"><span>קבלת פנים</span><input className="input" type="time" value={form.receptionTime} onChange={(e) => set('receptionTime', e.target.value)} /></label>
-          <label className="field"><span>חופה וקידושין</span><input className="input" type="time" value={form.chuppahTime} onChange={(e) => set('chuppahTime', e.target.value)} /></label>
+        <label className="cell"><span className="grow">קבלת פנים</span>{text('receptionTime', '19:30', { type: 'time' })}</label>
+        <label className="cell"><span className="grow">חופה</span>{text('chuppahTime', '20:30', { type: 'time' })}</label>
+      </Group>
+
+      <Group header="מקום" footer="קישור Waze לא חובה. בלי קישור, הניווט ייעשה לפי שם האולם והכתובת.">
+        <label className="cell"><span className="grow">אולם</span>{text('venueName', 'אולמי אלגריה')}</label>
+        <label className="cell"><span className="grow">כתובת</span>{text('venueAddress', 'רחוב, עיר')}</label>
+        <label className="cell"><span className="grow">Waze</span>{text('wazeUrl', 'https://waze.com/ul/…', { dir: 'ltr' })}</label>
+      </Group>
+
+      <Group header="תזכורות אוטומטיות" footer={form.remindersOn
+        ? `אחרי הסבב הראשון: מי שלא ענה או סימן "מתלבט" ייכנס לתזכורות אחרי ${form.reminderDays} ימים, עד ${form.maxReminders} פעמים. מי שסימן שלא מגיע לא יקבל יותר הודעות. התזכורות המוכנות מופיעות בסיכום ובלשונית השליחה.`
+        : 'התזכורות כבויות. אפשר עדיין לשלוח ידנית לפי קבוצות.'}>
+        <div className="cell"><span className="grow">תזכורות</span><Switch label="תזכורות אוטומטיות" checked={form.remindersOn} onChange={(v) => commit({ remindersOn: v })} /></div>
+        {form.remindersOn && <div className="cell"><span className="grow">תזכורת אחרי</span><span className="cell-value num">{form.reminderDays} ימים</span><Stepper value={form.reminderDays} min={1} max={30} onChange={(n) => commit({ reminderDays: n })} /></div>}
+        {form.remindersOn && <div className="cell"><span className="grow">עד</span><span className="cell-value num">{form.maxReminders} תזכורות</span><Stepper value={form.maxReminders} min={1} max={6} onChange={(n) => commit({ maxReminders: n })} /></div>}
+      </Group>
+
+      <Group header="נוסחי הודעות">
+        {TEMPLATES.map((t) => (
+          <button key={t.key} className="cell" onClick={() => { setEditing(t.key); setDraft(form[t.key]); }}>
+            <span className="grow"><span className="cell-title" style={{ display: 'block' }}>{t.label}</span><span className="cell-sub">{t.hint}</span></span>
+            <Chevron />
+          </button>
+        ))}
+        <label className="cell"><span className="grow">טקסט בדף האורח</span>{text('extraText', 'נשמח לראותכם')}</label>
+      </Group>
+
+      <Group>
+        <a href="#team" className="cell indent-icon">
+          <span className="cell-icon" style={{ background: '#007aff' }}><IconTeam /></span>
+          <span className="grow">שותפים והרשאות</span><Chevron />
+        </a>
+      </Group>
+
+      {account}
+
+      <Group footer="מוחק את כל המוזמנים, התשובות, השותפים וההגדרות. פעולה שאי אפשר לבטל.">
+        <button className="cell" style={{ justifyContent: 'center', color: 'var(--no-ink)' }} onClick={() => setResetOpen(true)}>התחלת אירוע חדש</button>
+      </Group>
+
+      <Sheet open={!!editing} onClose={() => setEditing(null)} title={TEMPLATES.find((t) => t.key === editing)?.label}
+        action={{ label: 'שמירה', onClick: () => { if (editing) commit({ [editing]: draft } as Partial<EventSettings>); setEditing(null); toast('נשמר'); } }}>
+        <div className="stack" style={{ gap: 14 }}>
+          <Group footer={<>משתנים: {'{name}'} שם · {'{couple}'} הזוג · {'{date}'} תאריך · {'{venue}'} מקום · {'{link}'} קישור אישי · {'{waze}'} ניווט</>}>
+            <textarea className="textarea" style={{ borderRadius: 0, minHeight: 180 }} value={draft} onChange={(e) => setDraft(e.target.value)} aria-label="נוסח ההודעה" />
+          </Group>
+          {editing && <button className="btn btn-ghost" onClick={() => setDraft(DEFAULT_SETTINGS[editing])}>שחזור הנוסח המקורי</button>}
         </div>
-        <label className="field"><span>שם האולם</span><input className="input" value={form.venueName} onChange={(e) => set('venueName', e.target.value)} placeholder="אלגריה" /></label>
-        <label className="field"><span>כתובת</span><input className="input" value={form.venueAddress} onChange={(e) => set('venueAddress', e.target.value)} placeholder="עיר / רחוב" /></label>
-        <label className="field">
-          <span>קישור Waze (לא חובה)</span>
-          <input className="input" dir="ltr" value={form.wazeUrl} onChange={(e) => set('wazeUrl', e.target.value)} placeholder="https://waze.com/ul/..." />
-          <span className="hint">אם ריק, הקישור ייווצר אוטומטית לפי שם האולם והכתובת. לדיוק מקסימלי: ב־Waze מחפשים את האולם ← שיתוף ← העתקת קישור.</span>
-        </label>
-        <label className="field"><span>טקסט נוסף בהזמנה</span><textarea className="textarea" rows={3} value={form.extraText} onChange={(e) => set('extraText', e.target.value)} /></label>
-      </div>
+      </Sheet>
 
-      <div className="card stack">
-        <div className="card-title" style={{ marginBottom: 0 }}>נוסחי הודעות</div>
-        <label className="field"><span>הזמנה (סבב ראשון)</span><textarea className="textarea" rows={5} value={form.inviteTemplate} onChange={(e) => set('inviteTemplate', e.target.value)} /></label>
-        <label className="field"><span>תזכורת (סבבים נוספים)</span><textarea className="textarea" rows={5} value={form.reminderTemplate} onChange={(e) => set('reminderTemplate', e.target.value)} /></label>
-        <label className="field"><span>תודה (אחרי החתונה)</span><textarea className="textarea" rows={3} value={form.thanksTemplate} onChange={(e) => set('thanksTemplate', e.target.value)} /></label>
-        <div className="hint">משתנים: {'{name}'} · {'{couple}'} · {'{date}'} · {'{venue}'} · {'{link}'}</div>
-        <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => setForm({ ...form, inviteTemplate: DEFAULT_SETTINGS.inviteTemplate, reminderTemplate: DEFAULT_SETTINGS.reminderTemplate, thanksTemplate: DEFAULT_SETTINGS.thanksTemplate })}>שחזור נוסח ברירת מחדל</button>
-      </div>
-
-      <div style={{ position: 'sticky', bottom: 'calc(92px + var(--safe-b))', zIndex: 5 }}>
-        <button className="btn btn-primary btn-block" style={{ minHeight: 54 }} disabled={busy} onClick={save}>{busy ? 'שומר…' : 'שמירת הגדרות'}</button>
-      </div>
+      <Sheet open={resetOpen} onClose={() => { setResetOpen(false); setConfirmText(''); }} title="אירוע חדש">
+        <div className="stack" style={{ gap: 18 }}>
+          <div className="center" style={{ fontSize: 44 }}>🗑️</div>
+          <p className="center" style={{ lineHeight: 1.5 }}>יימחקו <b>{guests?.length || 0} מוזמנים</b> עם כל התשובות, הברכות וההושבה, וגם השותפים וההגדרות. האתר יחזור להיות כמו חדש.</p>
+          <button className="btn btn-tinted btn-block" onClick={backup}>הורדת גיבוי לאקסל לפני המחיקה</button>
+          <Group header='כדי לאשר, כתבו "מחיקה"'>
+            <input className="input" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} placeholder="מחיקה" aria-label="אישור מחיקה" />
+          </Group>
+          <button className="btn btn-lg btn-block" style={{ background: 'var(--no)', color: '#fff' }} disabled={confirmText.trim() !== 'מחיקה' || !!resetting} onClick={doReset}>
+            {resetting || 'מחיקת כל הנתונים'}
+          </button>
+        </div>
+      </Sheet>
     </div>
   );
 }

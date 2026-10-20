@@ -97,15 +97,15 @@ export function AreaLine({ points, height = 150 }: { points: { label: string; va
       <svg viewBox={`0 0 ${w} ${h}`} width="100%" height={h} preserveAspectRatio="none" role="img" aria-label="תשובות מצטברות">
         <defs>
           <linearGradient id="accentArea" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#0fb5ae" stopOpacity=".35" />
-            <stop offset="100%" stopColor="#0fb5ae" stopOpacity="0" />
+            <stop offset="0%" stopColor="#30b0c7" stopOpacity=".35" />
+            <stop offset="100%" stopColor="#30b0c7" stopOpacity="0" />
           </linearGradient>
         </defs>
         {[0.25, 0.5, 0.75, 1].map((g) => (
           <line key={g} x1="0" x2={w} y1={pad.t + (1 - g) * (h - pad.t - pad.b)} y2={pad.t + (1 - g) * (h - pad.t - pad.b)} stroke="var(--border)" strokeDasharray="3 5" vectorEffect="non-scaling-stroke" />
         ))}
         {n > 0 && <path d={area} fill="url(#accentArea)" />}
-        {n > 0 && <path d={line} fill="none" stroke="#0fb5ae" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />}
+        {n > 0 && <path d={line} fill="none" stroke="#30b0c7" strokeWidth="2.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />}
       </svg>
       {n > 1 && (
         <div className="row faint" style={{ justifyContent: 'space-between', fontSize: 12, marginTop: -16 }}>
@@ -113,5 +113,29 @@ export function AreaLine({ points, height = 150 }: { points: { label: string; va
         </div>
       )}
     </div>
+  );
+}
+
+/** Apple Fitness–style concentric progress rings. */
+export function Rings({ rings, size = 150 }: { rings: { value: number; color: string; label: string }[]; size?: number }) {
+  const stroke = size * 0.105;
+  const gap = stroke * 0.18;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={rings.map((r) => `${r.label} ${Math.round(r.value * 100)}%`).join(', ')}>
+      {rings.map((r, i) => {
+        const rad = size / 2 - stroke / 2 - i * (stroke + gap);
+        const c = 2 * Math.PI * rad;
+        const v = Math.max(0, Math.min(1, r.value));
+        return (
+          <g key={r.label} transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+            <circle cx={size / 2} cy={size / 2} r={rad} fill="none" stroke={r.color} strokeOpacity={0.18} strokeWidth={stroke} />
+            <circle
+              cx={size / 2} cy={size / 2} r={rad} fill="none" stroke={r.color} strokeWidth={stroke} strokeLinecap="round"
+              strokeDasharray={`${Math.max(v * c, 0.001)} ${c}`} style={{ transition: 'stroke-dasharray 1s cubic-bezier(.2,.8,.2,1)' }}
+            />
+          </g>
+        );
+      })}
+    </svg>
   );
 }

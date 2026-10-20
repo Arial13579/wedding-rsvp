@@ -53,8 +53,11 @@ service cloud.firestore {
             && request.resource.data.addedByUid == request.auth.uid)
         // The guest answering from the invitation page
         || (request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['status', 'adults', 'children', 'total', 'updatedAt', 'remindOn'])
+              .hasOnly(['status', 'adults', 'children', 'total', 'updatedAt', 'remindOn', 'diet', 'message'])
             && request.resource.data.status in ['yes', 'maybe', 'no']
+            && request.resource.data.get('diet', '') in ['', 'veg', 'vegan', 'gf', 'other']
+            && request.resource.data.get('message', '') is string
+            && request.resource.data.get('message', '').size() <= 500
             && validCount(request.resource.data.adults)
             && validCount(request.resource.data.children)
             && request.resource.data.total == request.resource.data.adults + request.resource.data.children

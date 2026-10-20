@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut, type User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { isConfigured, OWNER_EMAIL } from '@/lib/config';
+import { BASE, isConfigured, OWNER_EMAIL } from '@/lib/config';
 import { getCollaborator, type Viewer } from '@/lib/data';
 import { IconGoogle } from './Icons';
 import { Spinner } from './ui';
@@ -46,9 +46,9 @@ export function useFirebaseUser() {
 export function BrandHeader({ sub }: { sub?: string }) {
   return (
     <div className="stack center" style={{ alignItems: 'center', gap: 10 }}>
-      <div className="brand-mark" style={{ width: 64, height: 64, borderRadius: 20, fontSize: 32 }}>💍</div>
-      <div style={{ fontSize: 26, fontWeight: 800 }} className="accent-text">החתונה שלנו</div>
-      {sub && <div className="muted" style={{ fontSize: 15 }}>{sub}</div>}
+      <img src={`${BASE}/icon-512.png`} alt="" width={84} height={84} style={{ borderRadius: 19, boxShadow: '0 12px 30px rgba(48,176,199,.35)' }} />
+      <div style={{ fontSize: 28, fontWeight: 700, marginTop: 6 }}>אישורי הגעה</div>
+      {sub && <div className="muted" style={{ fontSize: 17 }}>{sub}</div>}
     </div>
   );
 }
@@ -73,13 +73,11 @@ export function LoginScreen({ title, sub, error }: { title?: string; sub?: strin
   return (
     <div className="fullscreen-center soft-bg">
       <div className="stack" style={{ width: '100%', maxWidth: 400, gap: 26 }}>
-        <BrandHeader sub={sub || 'מערכת אישורי הגעה'} />
-        <div className="card stack" style={{ padding: 22 }}>
-          <div style={{ fontSize: 20, fontWeight: 800 }}>{title || 'כניסה למערכת'}</div>
-          <p className="muted" style={{ fontSize: 14, lineHeight: 1.6 }}>הגישה מוגבלת לבעלי הרשאה בלבד. התחברו עם חשבון Google שלכם.</p>
+        <BrandHeader sub={sub || title || 'החתונה שלנו'} />
+        <div className="stack" style={{ gap: 12 }}>
           <button
-            className="btn btn-block"
-            style={{ minHeight: 52 }}
+            className="btn btn-block btn-lg"
+            style={{ background: '#fff', color: '#000', boxShadow: '0 0 0 0.5px rgba(0,0,0,.15), 0 2px 8px rgba(0,0,0,.06)' }}
             disabled={busy}
             onClick={async () => {
               setBusy(true);
@@ -89,7 +87,8 @@ export function LoginScreen({ title, sub, error }: { title?: string; sub?: strin
           >
             <IconGoogle /> המשך עם Google
           </button>
-          {err && <div style={{ color: 'var(--no)', fontSize: 13 }}>{err}</div>}
+          <p className="hint center">הכניסה מוגבלת לבעלי האירוע ולשותפים שהוזמנו.</p>
+          {err && <div style={{ color: 'var(--no-ink)', fontSize: 15, textAlign: 'center' }}>{err}</div>}
         </div>
       </div>
     </div>

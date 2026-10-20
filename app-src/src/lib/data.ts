@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import {
-  collection, deleteDoc, doc, getDoc, increment, onSnapshot, query, serverTimestamp,
-  setDoc, updateDoc, where, writeBatch, type DocumentData, type Timestamp,
+  collection, deleteDoc, doc, getDoc, getDocs, increment, onSnapshot, query, serverTimestamp,
+  setDoc, Timestamp, updateDoc, where, writeBatch, type DocumentData,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { DEFAULT_SETTINGS, type EventSettings, type Guest, type Status } from './types';
+import { DEFAULT_SETTINGS, type Diet, type EventSettings, type Guest, type Status } from './types';
 import { randomToken } from './token';
 
 function ms(v: unknown): number | null {
@@ -33,6 +33,12 @@ export function toGuest(id: string, d: DocumentData): Guest {
     lastSentAt: ms(d.sentAt),
     // Guests' answers are stamped in updatedAt (shared with the original site)
     respondedAt: d.status && d.status !== 'pending' ? ms(d.updatedAt) : null,
+    remindOn: ms(d.remindOn),
+    diet: (['veg', 'vegan', 'gf', 'other'].includes(d.diet) ? d.diet : '') as Diet,
+    message: typeof d.message === 'string' ? d.message : '',
+    table: d.table ? String(d.table) : '',
+    gift: Number(d.gift) || 0,
+    arrived: !!d.arrived,
   };
 }
 
@@ -132,8 +138,25 @@ export async function updateGuest(id: string, patch: Partial<Omit<Guest, 'id'>>)
 }
 
 /** The answer a guest submits from the invitation page (fields allowed by firestore.rules). */
-export async function submitAnswer(id: string, status: Status, adults: number, kids: number) {
-  await updateDoc(doc(db(), 'guests', id), { status, adults, children: kids, total: adults + kids, updatedAt: serverTimestamp() });
+export interface Answer { status: Status; adults: number; kids: number; diet: Diet; message: string; remindDays: number }
+
+export async function submitAnswer(id: string, a: Answer) {
+  const ref = doc(db(), 'guests', id);
+  const answer = {
+    status: a.status,
+    adults: a.adults,
+    children: a.kids,
+    total: a.adults + a.kids,
+    remindOn: a.status === 'maybe' ? Timestamp.fromMillis(Date.now() + a.remindDays * 86400000) : null,
+    updatedAt: serverTimestamp(),
+  };
+  try {
+    await updateDoc(ref, { ...answer, diet: a.diet, message: a.message.trim().slice(0, 500) });
+  } catch (e) {
+    // Older security rules don't accept diet/message yet: never lose the RSVP itself because of them
+    if ((e as { code?: string }).code !== 'permission-denied') throw e;
+    await updateDoc(ref, answer);
+  }
 }
 
 /** Loads the uploaded invitation image (a data URL), or null when none was uploaded. */
@@ -154,6 +177,27 @@ export async function deleteGuests(ids: string[]) {
     ids.slice(i, i + 400).forEach((id) => batch.delete(doc(db(), 'guests', id)));
     await batch.commit();
   }
+}
+
+/** Deletes every guest, partner, share link and uploaded setting: a clean slate for a new event. */
+export async function resetEvent(onProgress?: (done: number, total: number) => void) {
+  const paths: string[] = [];
+  for (const name of ['guests', 'shareLinks', 'collaborators', 'meta']) {
+    try {
+      const snap = await getDocs(collection(db(), name));
+      snap.docs.forEach((d) => paths.push(`${name}/${d.id}`));
+    } catch (e) {
+      // Older security rules have no access to the partner collections (and nothing is stored there)
+      if ((e as { code?: string }).code !== 'permission-denied' || name === 'guests') throw e;
+    }
+  }
+  for (let i = 0; i < paths.length; i += 400) {
+    const batch = writeBatch(db());
+    paths.slice(i, i + 400).forEach((p) => batch.delete(doc(db(), p)));
+    await batch.commit();
+    onProgress?.(Math.min(i + 400, paths.length), paths.length);
+  }
+  return paths.length;
 }
 
 export async function markSent(id: string) {

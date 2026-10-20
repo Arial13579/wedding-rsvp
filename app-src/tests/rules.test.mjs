@@ -57,6 +57,9 @@ await expect('anonymous lists guests', false, () => getDocs(collection(anon.db, 
 // Guest answering from the invitation page
 await expect('guest reads own invitation', true, () => getDoc(doc(anon.db, 'guests/GUEST0001token')));
 await expect('guest confirms (2 adults, 1 kid)', true, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { status: 'yes', adults: 2, children: 1, total: 3, updatedAt: serverTimestamp() }));
+await expect('guest confirms with diet + blessing', true, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { status: 'yes', adults: 2, children: 0, total: 2, diet: 'veg', message: 'מזל טוב!', remindOn: null, updatedAt: serverTimestamp() }));
+await expect('guest sets a table', false, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { status: 'yes', adults: 2, children: 0, total: 2, table: '1', updatedAt: serverTimestamp() }));
+await expect('guest writes a huge message', false, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { status: 'yes', adults: 2, children: 0, total: 2, message: 'x'.repeat(600), updatedAt: serverTimestamp() }));
 await expect('guest fakes total', false, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { status: 'yes', adults: 1, children: 0, total: 9, updatedAt: serverTimestamp() }));
 await expect('guest changes name', false, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { name: 'Hacker' }));
 await expect('guest sets 100 adults', false, () => updateDoc(doc(anon.db, 'guests/GUEST0001token'), { status: 'yes', adults: 100, children: 0, total: 100, updatedAt: serverTimestamp() }));
@@ -85,6 +88,12 @@ await expect('owner sees partner guests', true, async () => {
 await expect('owner revokes partner', true, () => updateDoc(doc(owner.db, `collaborators/${partner.uid}`), { active: false }));
 await expect('revoked partner lists own guests', false, () => getDocs(query(collection(partner.db, 'guests'), where('addedByUid', '==', partner.uid))));
 await expect('revoked partner re-joins', false, () => setDoc(doc(partner.db, `collaborators/${partner.uid}`), { email: 'partner@gmail.com', name: 'P', via: 'LINK1', active: true }));
+
+await expect('owner resets: deletes guest', true, () => deleteDoc(doc(owner.db, 'guests/GUEST0001token')));
+await expect('owner resets: deletes collaborator', true, () => deleteDoc(doc(owner.db, `collaborators/${partner.uid}`)));
+await expect('owner resets: deletes share link', true, () => deleteDoc(doc(owner.db, 'shareLinks/LINK1')));
+await expect('owner resets: deletes settings', true, () => deleteDoc(doc(owner.db, 'meta/event')));
+await expect('stranger deletes settings', false, () => deleteDoc(doc(stranger.db, 'meta/event')));
 
 console.log(failed ? `\n${failed} FAILED` : '\nAll rules tests passed');
 process.exit(failed ? 1 : 0);

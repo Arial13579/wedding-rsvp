@@ -5,7 +5,7 @@ import { addGuests, updateGuest } from '@/lib/data';
 import { formatPhone, normalizePhone } from '@/lib/phone';
 import { STATUS_META, STATUS_ORDER, type Guest, type Status } from '@/lib/types';
 import { useAuth } from './AuthGate';
-import { Sheet, Stepper, useToast } from './ui';
+import { Group, Sheet, Stepper, useToast } from './ui';
 
 export function GuestEditor({ open, onClose, guest, tags }: { open: boolean; onClose: () => void; guest: Guest | null; tags: string[] }) {
   const { viewer } = useAuth();
@@ -59,41 +59,39 @@ export function GuestEditor({ open, onClose, guest, tags }: { open: boolean; onC
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title={guest ? 'עריכת מוזמן' : 'הוספת מוזמן ידנית'}>
-      <form className="stack" onSubmit={(e) => { e.preventDefault(); save(); }}>
-        <label className="field"><span>שם מלא</span><input className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" placeholder="ישראל ישראלי" /></label>
-        <label className="field"><span>טלפון</span><input className="input" type="tel" dir="ltr" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="050-000-0000" /></label>
-        <label className="field">
-          <span>קבוצה</span>
-          <input className="input" list="tag-list-editor" value={tag} onChange={(e) => setTag(e.target.value)} placeholder="משפחה / חברים / עבודה" />
-          <datalist id="tag-list-editor">{tags.map((t) => <option key={t} value={t} />)}</datalist>
-        </label>
-        <label className="field"><span>הערה</span><input className="input" value={note} onChange={(e) => setNote(e.target.value)} placeholder="לא חובה" /></label>
+    <Sheet open={open} onClose={onClose} title={guest ? 'עריכת מוזמן' : 'מוזמן חדש'} action={{ label: busy ? 'שומר…' : 'שמירה', onClick: () => save(), disabled: busy || !name.trim() }}>
+      <form className="stack" style={{ gap: 22 }} onSubmit={(e) => { e.preventDefault(); save(); }}>
+        <Group>
+          <label className="cell"><input className="input" style={{ textAlign: 'start' }} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" placeholder="שם מלא" aria-label="שם מלא" /></label>
+          <label className="cell"><input className="input" style={{ textAlign: 'start' }} type="tel" dir="ltr" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="טלפון" aria-label="טלפון" /></label>
+        </Group>
+        <Group footer="קבוצה עוזרת לסנן ולשלוח בנפרד, למשל משפחה, חברים או עבודה.">
+          <label className="cell"><span className="grow">קבוצה</span>
+            <input className="input" style={{ maxWidth: 180 }} list="tag-list-editor" value={tag} onChange={(e) => setTag(e.target.value)} placeholder="ללא" />
+            <datalist id="tag-list-editor">{tags.map((t) => <option key={t} value={t} />)}</datalist>
+          </label>
+          <label className="cell"><span className="grow">הערה</span><input className="input" style={{ maxWidth: 180 }} value={note} onChange={(e) => setNote(e.target.value)} placeholder="ללא" /></label>
+        </Group>
 
         {guest && (
-          <div className="card stack" style={{ background: 'var(--bg-2)' }}>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>עדכון סטטוס ידני</div>
-            <div className="segmented">
-              {STATUS_ORDER.map((s) => (
-                <button key={s} type="button" className={status === s ? 'on' : ''} onClick={() => setStatus(s)} style={status === s ? { color: STATUS_META[s].color } : undefined}>
-                  {STATUS_META[s].short}
-                </button>
-              ))}
-            </div>
-            {status === 'yes' && (
-              <div className="row wrap" style={{ justifyContent: 'space-around', gap: 16 }}>
-                <div className="stack center" style={{ gap: 6, alignItems: 'center' }}><span className="muted" style={{ fontSize: 13 }}>מבוגרים</span><Stepper value={adults} onChange={setAdults} /></div>
-                <div className="stack center" style={{ gap: 6, alignItems: 'center' }}><span className="muted" style={{ fontSize: 13 }}>ילדים</span><Stepper value={kids} onChange={setKids} /></div>
+          <Group header="תשובה" footer="לעדכון ידני, למשל אם האורח ענה בטלפון.">
+            <div className="cell">
+              <div className="segmented grow">
+                {STATUS_ORDER.map((s) => (
+                  <button key={s} type="button" className={status === s ? 'on' : ''} onClick={() => setStatus(s)} style={status === s ? { color: STATUS_META[s].ink } : undefined}>
+                    {STATUS_META[s].short}
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+            {status === 'yes' && <div className="cell"><span className="grow">מבוגרים</span><Stepper value={adults} onChange={setAdults} /></div>}
+            {status === 'yes' && <div className="cell"><span className="grow">ילדים</span><Stepper value={kids} onChange={setKids} /></div>}
+          </Group>
         )}
 
-        {error && <div style={{ color: 'var(--no)', fontSize: 13 }}>{error}</div>}
-        <div className="row">
-          {!guest && <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => save(true)}>שמירה והוספת עוד</button>}
-          <button type="submit" className="btn btn-primary grow" disabled={busy}>{busy ? 'שומר…' : 'שמירה'}</button>
-        </div>
+        {error && <div style={{ color: 'var(--no-ink)', fontSize: 15, textAlign: 'center' }}>{error}</div>}
+        {!guest && <button type="button" className="btn btn-tinted btn-block" disabled={busy || !name.trim()} onClick={() => save(true)}>שמירה והוספת עוד</button>}
+        <button type="submit" hidden />
       </form>
     </Sheet>
   );
