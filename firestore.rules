@@ -1,5 +1,8 @@
 rules_version = '2';
 
+// Firebase project wedding-rsvp-e2e0f is shared by TWO sites: the wedding RSVP and the
+// Snap Box quotes site. Publishing replaces ALL rules, so both must stay in this one file.
+//
 // Wedding RSVP — security rules.
 // Paste into: Firebase Console ▸ Firestore Database ▸ Rules ▸ Publish.
 // Owner: arielkahalani1@gmail.com (full access).
@@ -81,6 +84,54 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/shareLinks/$(request.resource.data.via))
         && get(/databases/$(database)/documents/shareLinks/$(request.resource.data.via)).data.active == true;
       allow update, delete: if isOwner();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  Snap Box quotes site (SnapBoxEvent_quotation) — shares this Firebase
+    //  project. Copied unchanged from that repo's _tests/firestore-full.rules.
+    // ═══════════════════════════════════════════════════════════════════
+    function isSnapAdmin() {
+      return request.auth != null && request.auth.token.email == 'snapboxevent.official@gmail.com';
+    }
+
+    match /snapbox_quotes/{id} {
+      allow get: if true;
+      allow create: if request.resource.data.status == 'pending'
+                    && request.resource.data.clientName is string
+                    && request.resource.data.price is number;
+      allow list, delete: if isSnapAdmin();
+      allow update: if isSnapAdmin()
+        || (
+            resource.data.status == 'pending' &&
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['status', 'signedAt', 'ip', 'userAgent'])
+           )
+        || (
+            resource.data.status == 'signed' &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pdfData']) &&
+            request.resource.data.pdfData.size() < 1000000
+           );
+    }
+
+    match /snapbox_expenses/{id} {
+      allow read, delete: if isSnapAdmin();
+      allow create, update: if isSnapAdmin()
+        && request.resource.data.keys().hasOnly(['date', 'amount', 'label', 'category', 'createdAt'])
+        && request.resource.data.amount is number && request.resource.data.amount > 0
+        && request.resource.data.label is string && request.resource.data.label.size() <= 120;
+    }
+
+    match /snapbox_incomes/{id} {
+      allow read, delete: if isSnapAdmin();
+      allow create, update: if isSnapAdmin()
+        && request.resource.data.keys().hasOnly(['date', 'amount', 'label', 'category', 'createdAt'])
+        && request.resource.data.amount is number && request.resource.data.amount > 0
+        && request.resource.data.label is string && request.resource.data.label.size() <= 120;
+    }
+
+    match /snapbox_events/{id} {
+      allow read, delete: if isSnapAdmin();
+      allow create, update: if isSnapAdmin() && request.resource.data.size() <= 40;
     }
   }
 }
