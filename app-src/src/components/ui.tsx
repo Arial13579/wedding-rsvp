@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { STATUS_META, type Status } from '@/lib/types';
 
 // ---------- Toast ----------
@@ -73,7 +74,8 @@ export function Sheet({ open, onClose, title, children, action }: {
   };
 
   if (!open) return null;
-  return (
+  // Rendered on <body> so no animated/transformed ancestor can trap it under the navigation bar
+  return createPortal(
     <div className={`overlay ${closing ? 'closing' : ''}`} onClick={dismiss}>
       <div
         ref={sheetRef} className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={title}
@@ -89,7 +91,8 @@ export function Sheet({ open, onClose, title, children, action }: {
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

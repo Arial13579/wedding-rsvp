@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react';
 import { useAdminData, useRoute } from '@/components/AdminShell';
 import { useAuth } from '@/components/AuthGate';
 import { ContactImport } from '@/components/ContactImport';
+import { detectDevice } from '@/lib/contacts';
+import { pickFromDevice, type ContactCandidate } from '@/lib/vcard';
 import { GuestEditor } from '@/components/GuestEditor';
 import { IconContacts, IconDownload, IconEdit, IconLink, IconPlus, IconSearch, IconTrash, IconWhatsApp } from '@/components/Icons';
 import { Chevron, Group, Initials, Sheet, Spinner, StatusBadge, Switch, useToast } from '@/components/ui';
@@ -37,6 +39,7 @@ export default function GuestsPage() {
   const [tagFilter, setTagFilter] = useState('');
   const [q, setQ] = useState('');
   const [importOpen, setImportOpen] = useState(false);
+  const [picked, setPicked] = useState<ContactCandidate[] | null>(null);
   const [editor, setEditor] = useState<{ open: boolean; guest: Guest | null }>({ open: false, guest: null });
   const [actionsId, setActionsId] = useState<string | null>(null);
 
@@ -83,6 +86,20 @@ export default function GuestsPage() {
     a.click();
   }
 
+  // One tap: where the browser has a contact picker, open it right away (it must run inside the tap itself)
+  async function addFromContacts() {
+    if (detectDevice().picker) {
+      try {
+        const list = await pickFromDevice();
+        if (!list.length) return; // cancelled
+        setPicked(list);
+      } catch {
+        setPicked(null);
+      }
+    }
+    setImportOpen(true);
+  }
+
   const people = (gs: Guest[]) => gs.reduce((s, g) => s + Math.max(1, g.adults + g.kids), 0);
 
   return (
@@ -103,7 +120,7 @@ export default function GuestsPage() {
 
       {view === 'list' ? (
         <>
-          <button className="btn btn-primary btn-lg btn-block" onClick={() => setImportOpen(true)}><IconContacts width={20} height={20} /> הוספה מאנשי הקשר</button>
+          <button className="btn btn-primary btn-lg btn-block" onClick={addFromContacts}><IconContacts width={20} height={20} /> הוספה מאנשי הקשר</button>
 
           <div className="search">
             <IconSearch />
@@ -177,7 +194,7 @@ export default function GuestsPage() {
         </>
       )}
 
-      <ContactImport open={importOpen} onClose={() => setImportOpen(false)} existingPhones={phones} tags={tags} />
+      <ContactImport open={importOpen} initial={picked} onClose={() => { setImportOpen(false); setPicked(null); }} existingPhones={phones} tags={tags} />
       <GuestEditor open={editor.open} guest={editor.guest} tags={tags} onClose={() => setEditor({ open: false, guest: null })} />
 
       <Sheet open={!!actions} onClose={() => setActionsId(null)} title={actions?.name}>
